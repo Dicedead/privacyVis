@@ -1,7 +1,7 @@
 import scipy.special as sps
 import numpy as np
 
-from definitions import Constraint, Region
+from definitions import Region
 from typing import List
 
 
@@ -51,16 +51,37 @@ def region_from_dp_composition_basic(eps, delta, k) -> Region:
     of differentially private mechanisms.
 
     :param eps: float
-            Epsilon parameter of the differentially private
+            Epsilon parameter of the differentially private mechanisms being composed.
 
-    :param delta:
-    :param k:
-    :return:
+    :param delta: float
+            Delta parameter of the differentially private mechanisms being composed.
+
+    :param k: int
+            Number of composed mechanisms.
+
+    :return: Region
+            List of constraints defining the privacy region.
     """
     return region_from_dp_params(k * eps, k * delta)
 
 
 def region_from_dp_composition_exact(eps, delta, k) -> Region:
+    """
+    Compute the differential privacy region basic composition corresponding to the improved result for the composition
+    of differentially private mechanisms.
+
+    :param eps: float
+            Epsilon parameter of the differentially private mechanisms being composed.
+
+    :param delta: float
+            Delta parameter of the differentially private mechanisms being composed.
+
+    :param k: int
+            Number of composed mechanisms.
+
+    :return: Region
+            List of constraints defining the privacy region.
+    """
     constraints = []
     for i in range(np.floor(k/2)+1):
         eps_prime = (k - 2 * i) * eps
