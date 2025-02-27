@@ -13,6 +13,29 @@ def draw_region_from_constraints(
         cmap="Greys",
         alpha=0.3
 ):
+    # TODO make this function not show directly + possibility to plot multiple regions on same figure + make figure larger
+    """
+    Draw a region from a list of constraints.
+
+    :param constraints: Sequence[Constraint]
+            Given constraints.
+
+    :param start_grid: float
+            Smallest grid value, defaults to 0.
+
+    :param stop_grid: float
+            Largest grid value, defaults to 1.
+
+    :param grid_res: int
+            Grid resolution, defaults to 500.
+
+    :param cmap: str
+            Colormap, defaults to "Greys".
+
+    :param alpha: float
+            Alpha value, defaults to 0.3.
+    """
+
     assert len(constraints) > 0
 
     d = np.linspace(start_grid, stop_grid, num=grid_res)
