@@ -74,8 +74,7 @@ class MultiRegionFigure:
                    origin="lower", cmap=self._cmap, alpha=self._alpha)
         self._labels.append(label)
 
-    def finish_figure(self):
-        # TODO add option for title
+    def finish_figure(self, title=""):
         patches = [mpatches.Patch(color=[0.1,0.1,1.0, self._alpha ** i], label=lab)
                    for i, lab in enumerate(self._labels)]
         plt.legend(handles=patches)
@@ -83,6 +82,7 @@ class MultiRegionFigure:
         plt.ylim(self._start, self._stop)
         plt.xlabel('FN')
         plt.ylabel('FP')
+        plt.title(title)
 
     def show_figure(self):
         plt.show()
