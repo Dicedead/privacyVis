@@ -55,27 +55,30 @@ class MultiRegionFigure:
     def __init__(self,
         start_grid=0,
         stop_grid=1,
-        grid_res=600,
-        cmap="Blues",
-        alpha=0.2
+        grid_res=600
     ):
         d = np.linspace(start_grid, stop_grid, num=grid_res)
+        self._k = 1
         self._x, self._y = np.meshgrid(d, d)
         self._start = start_grid
         self._stop = stop_grid
-        self._cmap = cmap
-        self._alpha = alpha
         self._labels = []
+
+        # TODO fix and generalize palette choice
+        palette = [[255, 255, 255, 0]]
+        palette.extend([[120, 120, 255-50*i, 255] for i in range(10)])
+        self._palette = np.array(palette)
 
     def add_region(self, constraints: Sequence[Constraint], label: str):
         applied_constraints = [constraint(self._x, self._y) for constraint in constraints]
-        plt.imshow((reduce(lambda c1, c2: c1 & c2, applied_constraints)).astype(float),
+        plt.imshow(self._palette[self._k * (reduce(lambda c1, c2: c1 & c2, applied_constraints)).astype(int)],
                    extent=(self._start, self._stop, self._start, self._stop),
-                   origin="lower", cmap=self._cmap, alpha=self._alpha)
+                   origin="lower")
         self._labels.append(label)
+        self._k += 1
 
     def finish_figure(self, title=""):
-        patches = [mpatches.Patch(color=[0.1,0.1,1.0, self._alpha ** i], label=lab)
+        patches = [mpatches.Patch(color=self._palette[i+1]/255., label=lab)
                    for i, lab in enumerate(self._labels)]
         plt.legend(handles=patches)
         plt.xlim(self._start, self._stop)
