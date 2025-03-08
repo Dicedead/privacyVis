@@ -65,7 +65,7 @@ class MultiRegionFigure:
         self._labels = []
 
         # TODO fix and generalize palette choice
-        palette = [[255, 255, 255, 0]]
+        palette = [[255, 255, 255, 0], [255, 0, 0, 200], [0, 255, 0, 200]]
         palette.extend([[120, 120, 255-50*i, 255] for i in range(10)])
         self._palette = np.array(palette)
 

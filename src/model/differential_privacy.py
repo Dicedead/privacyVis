@@ -47,6 +47,9 @@ def region_from_dp_params(eps: float, delta: float) -> Region:
 
     return [ineq, reverse_ineq, sum_line]
 
+def region_from_dp_tv_params(eps: float, delta: float, eta: float):
+    tv_constraint = lambda fp, fn: fp + fn >= 1 - eta
+    return intersect_regions([region_from_dp_params(eps, delta), [tv_constraint]])
 
 def region_from_dp_composition_basic(eps: float, delta: float, k: int) -> Region:
     """
