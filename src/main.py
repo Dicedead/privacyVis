@@ -1,7 +1,4 @@
-import numpy as np
-
-from differential_privacy import *
-from mechanisms import *
+from laplace import *
 from regions import *
 
 # eps = 2
