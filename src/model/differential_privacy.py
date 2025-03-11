@@ -48,6 +48,21 @@ def region_from_dp_params(eps: float, delta: float) -> Region:
     return [ineq, reverse_ineq, sum_line]
 
 def region_from_dp_tv_params(eps: float, delta: float, eta: float):
+    """
+    Define the privacy region corresponding to (eps, delta)-differential privacy with eta-total variation.
+
+    :param eps: float
+            Epsilon parameter of the differential privacy region.
+
+    :param delta: float
+            Delta parameter of the differential privacy region.
+
+    :param eta: float
+            Total variation of the mechanism.
+
+    :return: Region
+            List of constraints defining the privacy region.
+    """
     tv_constraint = lambda fp, fn: fp + fn >= 1 - eta
     return intersect_regions([region_from_dp_params(eps, delta), [tv_constraint]])
 

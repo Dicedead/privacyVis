@@ -65,8 +65,18 @@ class MultiRegionFigure:
         self._labels = []
 
         # TODO fix and generalize palette choice
-        palette = [[255, 255, 255, 0], [255, 0, 0, 200], [0, 255, 0, 200]]
-        palette.extend([[120, 120, 255-50*i, 255] for i in range(10)])
+        # note: this is a colorblind friendly palette
+        palette = [
+            [255, 255, 255, 0],
+            [0, 0, 0, 255],
+            [230, 159, 0, 255],
+            [86, 180, 233, 255],
+            [0, 158, 115, 255],
+            [240, 228, 66, 255],
+            [0, 114, 178, 255],
+            [213, 94, 0, 255],
+            [204, 121, 167, 255]
+        ]
         self._palette = np.array(palette)
 
     def add_region(self, constraints: Sequence[Constraint], label: str):
