@@ -1,6 +1,7 @@
 from additive_mechanism import AdditiveMechanism
 from differential_privacy import *
 
+
 class GaussianMechanism(AdditiveMechanism):
     """
     Gaussian mechanism definition.

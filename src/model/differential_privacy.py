@@ -112,7 +112,7 @@ def region_from_dp_composition_exact(eps: float, delta: float, k: int) -> Region
     assert k >= 0
 
     constraints = []
-    for i in range(np.floor(k/2)+1):
+    for i in range(int(np.floor(k/2)+1)):
         eps_prime = (k - 2 * i) * eps
         delta_tmp = sum([sps.comb(k, l) * (np.exp((k-l) * eps) - np.exp((k-2*i+l) * eps)) for l in range(i)])
         delta_tmp /= (1+np.exp(eps)) ** k
