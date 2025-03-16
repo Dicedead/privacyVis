@@ -1,3 +1,5 @@
+import copy
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
@@ -5,6 +7,9 @@ import matplotlib.patches as mpatches
 from definitions import Constraint
 from typing import Sequence
 from functools import reduce
+
+from palettes import colourblind_palette
+
 
 def draw_single_region_from_constraints(
         constraints: Sequence[Constraint],
@@ -51,11 +56,13 @@ def draw_single_region_from_constraints(
     plt.show()
 
 
+
 class MultiRegionFigure:
     def __init__(self,
         start_grid=0,
         stop_grid=1,
-        grid_res=600
+        grid_res=600,
+        palette=None
     ):
         d = np.linspace(start_grid, stop_grid, num=grid_res)
         self._k = 1
@@ -64,20 +71,9 @@ class MultiRegionFigure:
         self._stop = stop_grid
         self._labels = []
 
-        # TODO fix and generalize palette choice
-        # note: this is a colorblind friendly palette
-        palette = [
-            [255, 255, 255, 0],
-            [230, 159, 0, 255],
-            [86, 180, 233, 255],
-            [0, 158, 115, 255],
-            [240, 228, 66, 255],
-            [0, 114, 178, 255],
-            [213, 94, 0, 255],
-            [204, 121, 167, 255],
-            [0, 0, 0, 255]
-        ]
-        palette.extend([[255-t[0], 255-t[1], 255-t[2], 255] for t in palette[1:-1]])
+        if palette is None:
+            palette = copy.deepcopy(colourblind_palette())
+
         self._palette = np.array(palette)
 
     def add_region(self, constraints: Sequence[Constraint], label: str):
