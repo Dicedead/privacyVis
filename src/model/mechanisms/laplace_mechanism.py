@@ -7,6 +7,7 @@ class LaplaceMechanism(AdditiveMechanism):
     Laplace mechanism definition.
     """
 
+    # TODO add notion of query function f in init
     def __init__(self, eps: float):
         """
         Construct the mechanism.

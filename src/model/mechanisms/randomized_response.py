@@ -1,12 +1,14 @@
 import numpy as np
 
-from differential_privacy import region_from_dp_params
-from definitions import Region
+from definitions import Region, TradeOffFunction
+from mechanism import Mechanism
 
-class RandomizedResponse:
+
+class RandomizedResponse(Mechanism):
     """
     Define the privacy region and the utility proxy of randomized response.
     """
+
     def __init__(self, eps: float, alphabet_size: int):
         """
         Instantiate the randomized response parameters.
@@ -17,17 +19,10 @@ class RandomizedResponse:
         :param alphabet_size: int
                 Size of randomized input alphabet.
         """
+        super().__init__(eps, 0)
         exp_eps = np.exp(eps)
-        self._eps = eps
+        self._denom = 1/(exp_eps + alphabet_size - 1)
         self._p_eps = (exp_eps - 1)/(exp_eps + alphabet_size - 1)
-
-    def privacy_region(self) -> Region:
-        """
-        (eps,0) differential privacy region, corresponding to the exact trade-off function of the mechanism.
-
-        :return: Region
-        """
-        return region_from_dp_params(self._eps, 0)
 
     def switch_probability(self) -> float:
         """
@@ -51,3 +46,11 @@ class RandomizedResponse:
         """
         p = 1-p
         return np.log((p + (1-p)/alphabet_size) / ((1-p)/alphabet_size))
+
+    def tradeoff_function(self) -> TradeOffFunction:
+        # TODO define tradeoff function
+        pass
+
+    def tv(self) -> float:
+        # TODO define tv or return nan
+        pass

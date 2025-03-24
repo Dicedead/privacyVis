@@ -12,3 +12,5 @@ def colourblind_palette():
     ]
     palette.extend([[255 - t[0], 255 - t[1], 255 - t[2], 255] for t in palette[1:-1]])
     return palette
+
+# TODO add more palettes

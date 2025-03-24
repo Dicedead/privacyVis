@@ -1,5 +1,6 @@
-from gaussianmechanism import GaussianMechanism
-from laplacemechanism import *
+from gaussian_mechanism import GaussianMechanism
+from laplace_mechanism import *
+from randomized_response import RandomizedResponse
 from regions import *
 
 def f_eps_delta_dp(eps, delta):
@@ -53,4 +54,13 @@ def gaussianmech():
     fig.finish_figure()
     fig.show_figure()
 
-gdp()
+def randomized_resp():
+    eps = 0.3
+    mech = RandomizedResponse(eps, 5)
+    fig = MultiRegionFigure()
+    fig.add_region(region_from_dp_params(eps, 0), "dp no tv")
+    fig.add_region(mech.privacy_region(), "actual")
+    fig.finish_figure()
+    fig.show_figure()
+
+randomized_resp()

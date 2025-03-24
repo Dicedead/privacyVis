@@ -7,6 +7,7 @@ class GaussianMechanism(AdditiveMechanism):
     Gaussian mechanism definition.
     """
 
+    # TODO add notion of query function f in init
     def __init__(self, eps: float, delta: float):
         """
         Construct the mechanism.
