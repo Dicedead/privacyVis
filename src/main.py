@@ -59,7 +59,7 @@ def randomized_resp():
     mech = RandomizedResponse(eps, 5)
     fig = MultiRegionFigure()
     fig.add_region(region_from_dp_params(eps, 0), "dp no tv")
-    fig.add_region(mech.privacy_region(), "actual")
+    fig.add_region(mech.region_exact(), "actual")
     fig.finish_figure()
     fig.show_figure()
 

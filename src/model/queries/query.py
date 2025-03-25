@@ -1,13 +1,26 @@
-from abc import ABC
-from typing import Callable, Any
-
 import numpy as np
+
+from mechanism import Mechanism
+from abc import ABC, abstractmethod
+from typing import Callable, Any
 
 
 class Query(ABC, Callable[[np.ndarray], Any]):
-    def __init__(self, f: Callable[[np.ndarray], Any]):
-        self._func = f
+    @abstractmethod
+    def apply(self, x: np.ndarray) -> Any:
+        pass
 
     def __call__(self, x: np.ndarray) -> Any:
-        return self._func(x)
+        return self.apply(x)
+
+
+class DPQuery(Query):
+    def __init__(self, eps: float, delta: float, mech: Mechanism):
+        self._eps = eps
+        self._delta = delta
+        self._mech = mech
+
+    @abstractmethod
+    def mse(self):
+        pass
 

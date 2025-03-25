@@ -7,8 +7,7 @@ class GaussianMechanism(AdditiveMechanism):
     Gaussian mechanism definition.
     """
 
-    # TODO add notion of query function f in init
-    def __init__(self, eps: float, delta: float):
+    def __init__(self, eps: float, delta: float, l2_sens: float):
         """
         Construct the mechanism.
 
@@ -22,6 +21,7 @@ class GaussianMechanism(AdditiveMechanism):
         self._mu = 0
         self._sigma = 1
         self._shiftval = eps/np.sqrt(2 * np.log(5/(4 * delta)))
+        self._l2_sens = l2_sens
 
     def quantile(self, alpha: float | np.ndarray) -> np.ndarray:
         return self._sigma * stats.norm.ppf(alpha) + self._mu
@@ -34,3 +34,6 @@ class GaussianMechanism(AdditiveMechanism):
 
     def tv(self):
         return 2 * stats.norm.cdf(self._mu / 2) - 1
+
+    def noise_variance(self) -> float:
+        return 2 * np.log(5/(4 * self._delta)) * ((self._l2_sens / self._eps) ** 2)

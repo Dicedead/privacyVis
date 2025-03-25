@@ -5,7 +5,7 @@ from definitions import TradeOffFunction, Region
 from mechanism import Mechanism
 
 
-class AdditiveMechanism(ABC, Mechanism):
+class AdditiveMechanism(Mechanism):
     """
     Represent differentially private mechanisms of the form M(X) = f(X) + N where N is noise.
     """
@@ -37,6 +37,10 @@ class AdditiveMechanism(ABC, Mechanism):
         pass
 
     @abstractmethod
+    def noise_variance(self) -> float:
+        pass
+
+    @abstractmethod
     def _shift(self) -> float:
         """
         Shift defining the tradeoff-function, of the form:
@@ -45,8 +49,6 @@ class AdditiveMechanism(ABC, Mechanism):
         :return: float
         """
         pass
-
-
 
     def tradeoff_function(self) -> TradeOffFunction:
         """

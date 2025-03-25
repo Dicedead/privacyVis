@@ -7,13 +7,15 @@ class LaplaceMechanism(AdditiveMechanism):
     Laplace mechanism definition.
     """
 
-    # TODO add notion of query function f in init
-    def __init__(self, eps: float):
+    def __init__(self, eps: float, l1_sens: float):
         """
         Construct the mechanism.
 
         :param eps: float
                 Epsilon parameter of the differentially private mechanism.
+
+        :param l1_sens: float
+                L1 sensitivity of the protected function.
 
         For the Laplace mechanism, delta = 0.
         """
@@ -21,6 +23,7 @@ class LaplaceMechanism(AdditiveMechanism):
         self._mu = 0
         self._scale = 1
         self._eps = eps
+        self._l1_sens = l1_sens
 
     def quantile(self, alpha: float | np.ndarray) -> np.ndarray:
         alpha = np.array(alpha)
@@ -38,3 +41,6 @@ class LaplaceMechanism(AdditiveMechanism):
 
     def tv(self) -> float:
         return 1-np.exp(-self._eps/2)
+
+    def noise_variance(self) -> float:
+        return self._l1_sens / self._eps
