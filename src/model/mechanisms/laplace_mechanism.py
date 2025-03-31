@@ -1,3 +1,5 @@
+from typing import Any
+
 from additive_mechanism import AdditiveMechanism
 from differential_privacy import *
 
@@ -42,5 +44,8 @@ class LaplaceMechanism(AdditiveMechanism):
     def tv(self) -> float:
         return 1-np.exp(-self._eps/2)
 
-    def noise_variance(self) -> float:
+    def noise_scale(self) -> float:
         return self._l1_sens / self._eps
+
+    def generate_noise(self, size) -> np.ndarray:
+        return np.random.laplace(loc=0, scale=self.noise_scale(), size=size)

@@ -1,8 +1,9 @@
 import numpy as np
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 from definitions import TradeOffFunction, Region
 from mechanism import Mechanism
+from typing import Any
 
 
 class AdditiveMechanism(Mechanism):
@@ -37,7 +38,11 @@ class AdditiveMechanism(Mechanism):
         pass
 
     @abstractmethod
-    def noise_variance(self) -> float:
+    def noise_scale(self) -> float:
+        pass
+
+    @abstractmethod
+    def generate_noise(self, size) -> np.ndarray:
         pass
 
     @abstractmethod
@@ -58,4 +63,7 @@ class AdditiveMechanism(Mechanism):
         :return: TradeoffFunction
         """
         return lambda fp: self.cdf(self.quantile(1 - fp) - self._shift())
+
+    def apply(self, x: np.ndarray, *args, **kwargs) -> Any:
+        return x + self.generate_noise(x.shape)
 

@@ -37,9 +37,11 @@ class DPMedian(DPQuery):
             return -np.abs(np.sum(np.sign(data-labels)))
 
         self._median = Median(alphabet_size)
-        super().__init__(eps, 0, ExponentialMechanism(eps, score_func))
+        self._expmech = ExponentialMechanism(eps, score_func)
+        super().__init__(eps, 0)
 
-    def mse(self):
+    def utility(self):
+        # TODO finish median
         pass
 
     def apply(self, x: np.ndarray) -> Any:

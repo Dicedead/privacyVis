@@ -15,12 +15,11 @@ class Query(ABC, Callable[[np.ndarray], Any]):
 
 
 class DPQuery(Query):
-    def __init__(self, eps: float, delta: float, mech: Mechanism):
+    def __init__(self, eps: float, delta: float):
         self._eps = eps
         self._delta = delta
-        self._mech = mech
 
     @abstractmethod
-    def mse(self):
+    def utility(self, *args, **kwargs):
         pass
 

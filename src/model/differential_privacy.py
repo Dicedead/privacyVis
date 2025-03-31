@@ -233,6 +233,38 @@ def region_from_f_dp(f: TradeOffFunction) -> Region:
 
     return [sum_line, main_region]
 
+def tradeoff_eps_delta_dp(eps: float, delta: float) -> TradeOffFunction:
+    """
+    Return the trade-off function corresponding to (eps, delta)-DP.
+
+    :param eps: float
+
+    :param delta: float
+
+    :return: TradeOffFunction
+    """
+    return lambda fp: np.maximum(np.maximum(0, 1 - delta - np.exp(eps) * fp), np.exp(-eps) * (1 - delta - fp))
+
+def tradeoff_eps_delta_dp_total_var(eps, delta, eta) -> TradeOffFunction:
+    """
+    Return the trade-off function corresponding to (eps, delta)-DP with eta total variation.
+
+    :param eps: float
+
+    :param delta: float
+
+    :param eta: float
+
+    :return: TradeOffFunction
+    """
+    return lambda fp: np.maximum(1 - fp - eta,
+        np.maximum(
+            np.maximum(0, 1 - delta - np.exp(eps) * fp),
+            np.exp(-eps) * (1 - delta - fp)
+        )
+    )
+
+
 def region_from_gaussian_dp(mu: float) -> Region:
     """
     Compute the Gaussian-DP region for a given mu.

@@ -55,7 +55,7 @@ def gaussianmech():
     fig.show_figure()
 
 def randomized_resp():
-    eps = 0.3
+    eps = 0.9
     mech = RandomizedResponse(eps, 5)
     fig = MultiRegionFigure()
     fig.add_region(region_from_dp_params(eps, 0), "dp no tv")

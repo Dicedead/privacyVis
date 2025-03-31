@@ -1,7 +1,7 @@
 import numpy as np
 
 from sensitivities import L1Sensitivity
-from query import Query
+from query import Query, DPQuery
 from typing import Any
 
 
@@ -20,3 +20,15 @@ class Mean(Query, L1Sensitivity):
 class FiniteAlphabetMean(Mean):
     def __init__(self, alphabet: np.ndarray, dataset_size: int):
         super().__init__(np.max(alphabet) - np.min(alphabet), dataset_size)
+
+
+class DPMean(DPQuery):
+    def __init__(self, alphabet: np.ndarray, dataset_size: int):
+        # TODO init a Laplace mechanism
+        pass
+
+    def utility(self):
+        pass
+
+    def apply(self, x: np.ndarray) -> Any:
+        pass

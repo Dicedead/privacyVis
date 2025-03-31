@@ -1,4 +1,7 @@
 from abc import ABC, abstractmethod
+from typing import Any
+
+import numpy as np
 
 from definitions import TradeOffFunction, Region
 from differential_privacy import region_from_f_dp, region_from_dp_tv_params
@@ -14,6 +17,10 @@ class Mechanism(ABC):
         """
         self._eps = eps
         self._delta = delta
+
+    @abstractmethod
+    def apply(self, x: np.ndarray, *args, **kwargs) -> Any:
+        pass
 
     @abstractmethod
     def tradeoff_function(self) -> TradeOffFunction:
@@ -41,3 +48,6 @@ class Mechanism(ABC):
         :return: Region
         """
         return region_from_dp_tv_params(self._eps, self._delta, self.tv())
+
+    def __call__(self, x: np.ndarray, *args, **kwargs) -> Any:
+        return self.apply(x)
