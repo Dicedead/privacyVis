@@ -25,9 +25,9 @@ class RandomizedResponse(Mechanism):
         super().__init__(eps, 0)
         exp_eps = np.exp(eps)
         self._denom = 1/(exp_eps + alphabet_size - 1)
-        self._total_var = 1 - alphabet_size * self._denom
         self._alphabet_size = alphabet_size
         self._p_eps = (exp_eps - 1) * self._denom
+        self._total_var = self._p_eps
 
     def switch_probability(self) -> float:
         """

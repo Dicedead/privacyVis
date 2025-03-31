@@ -1,6 +1,5 @@
 import numpy as np
 
-from mechanism import Mechanism
 from abc import ABC, abstractmethod
 from typing import Callable, Any
 

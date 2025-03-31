@@ -39,10 +39,23 @@ class AdditiveMechanism(Mechanism):
 
     @abstractmethod
     def noise_scale(self) -> float:
+        """
+        Notion of noise scale (variance or other measure if appropriate).
+
+        :return: float
+        """
         pass
 
     @abstractmethod
     def generate_noise(self, size) -> np.ndarray:
+        """
+        Generate random noise according to the prescribed distribution.
+
+        :param size: shape of random variables to generate
+
+        :return: np.ndarray
+                Random samples from the  prescribed distribution.
+        """
         pass
 
     @abstractmethod
@@ -65,5 +78,17 @@ class AdditiveMechanism(Mechanism):
         return lambda fp: self.cdf(self.quantile(1 - fp) - self._shift())
 
     def apply(self, x: np.ndarray, *args, **kwargs) -> Any:
+        """
+        Apply additive noise.
+
+        :param x: np.ndarray
+                Array to privatize.
+
+        :param args: unused
+
+        :param kwargs: unused
+
+        :return: Result.
+        """
         return x + self.generate_noise(x.shape)
 

@@ -45,6 +45,11 @@ class LaplaceMechanism(AdditiveMechanism):
         return 1-np.exp(-self._eps/2)
 
     def noise_scale(self) -> float:
+        """
+        Scale b of the Laplacian noise, such that Var(Laplace(mu, b)) = 2b².
+
+        :return: float
+        """
         return self._l1_sens / self._eps
 
     def generate_noise(self, size) -> np.ndarray:
