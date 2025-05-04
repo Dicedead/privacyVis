@@ -38,6 +38,11 @@ class RandomizedResponse(Mechanism):
         return 1 - self._p_eps
 
     @staticmethod
+    def compute_randomized_response_proba(eps: float, alphabet_size: int) -> float:
+        # TODO
+        pass
+
+    @staticmethod
     def compute_randomized_response_epsilon(p: float, alphabet_size: int) -> float:
         """
         Given a random choice probability p and an alphabet size, compute the corresponding epsilon parameter

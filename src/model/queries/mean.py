@@ -24,13 +24,18 @@ class FiniteAlphabetMean(Mean):
 
 
 class DPMean(DPQuery):
+
     def __init__(self, alphabet: np.ndarray, dataset_size: int, eps: float):
         self._mean = Mean(np.max(alphabet) - np.min(alphabet), dataset_size)
         self._laplace = LaplaceMechanism(eps, self._mean.l1_sens())
         super().__init__(eps, 0)
 
     def utility(self):
-        return self._laplace.noise_scale()
+        return DPMean.utility_func(hist_eps=self._eps, hist_l1_sens=self._mean.l1_sens())
+
+    @staticmethod
+    def utility_func(*args, **kwargs):
+        return 2 * (LaplaceMechanism.noise_scale_func(kwargs["mean_eps"], kwargs["mean_l1_sens"]) ** 2)
 
     def apply(self, x: np.ndarray) -> Any:
         return self._laplace(np.array(self._mean.apply(x)))

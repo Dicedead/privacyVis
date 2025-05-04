@@ -50,7 +50,11 @@ class LaplaceMechanism(AdditiveMechanism):
 
         :return: float
         """
-        return self._l1_sens / self._eps
+        return LaplaceMechanism.noise_scale_func(self._eps, self._l1_sens)
+
+    @staticmethod
+    def noise_scale_func(eps, l1_sens):
+        return l1_sens / eps
 
     def generate_noise(self, size) -> np.ndarray:
         return np.random.laplace(loc=0, scale=self.noise_scale(), size=size)

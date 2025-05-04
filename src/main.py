@@ -37,7 +37,7 @@ def composition_comparison():
 def laplacemech():
     eps = 1
     fig = MultiRegionFigure()
-    lap = LaplaceMechanism(eps)
+    lap = LaplaceMechanism(eps, 1)
     fig.add_region(region_from_dp_params(eps, 0), "dp no tv")
     fig.add_region(lap.region_tv(), "tv")
     fig.add_region(lap.region_exact(), "exact")
@@ -48,7 +48,7 @@ def gaussianmech():
     eps = 1.3
     delta = 0.3
     fig = MultiRegionFigure()
-    gau = GaussianMechanism(eps, delta)
+    gau = GaussianMechanism(eps, delta, 1)
     fig.add_region(gau.region_exact(), "exact")
     fig.add_region(gau.region_tv(), "tv")
     fig.finish_figure()
@@ -63,4 +63,59 @@ def randomized_resp():
     fig.finish_figure()
     fig.show_figure()
 
-randomized_resp()
+def composing_dps_intersection_tv(eps = 0.5, delta = 0.1, eta_factor = 0.75):
+
+    eta = eta_factor * (delta + ((np.exp(eps) - 1) * (1 - delta)) / (np.exp(eps) + 1))
+
+    intersection = intersect_regions([
+        region_from_dp_composition_exact(eps, delta, 2),  # (eps, delta)-DP x (eps, delta) - DP
+        region_from_dp_params(0, 1 - (1 - eta) * (1 - eta)),  # (0, eta)-DP x (0, eta)-DP
+        region_from_dp_params(eps, 1 - (1-delta) * (1-eta)) # (eps, delta)-DP x (0, eta)-DP
+        ]
+    )
+
+    intersection_2 = intersect_regions([
+        region_from_dp_composition_exact(eps, delta, 2),  # (eps, delta)-DP x (eps, delta) - DP
+        region_from_dp_params(0, 1 - (1 - eta) * (1 - eta)),  # (0, eta)-DP x (0, eta)-DP
+        region_from_dp_params(eps, 1 - (1-delta) * (1-eta)), # (eps, delta)-DP x (0, eta)-DP
+        region_from_dp_composition_exact(np.log(((1 - 1.0002 * delta)/(1-delta)) * (1 + np.exp(eps)) - 1), 2 * delta, 2)
+        ] # instead of 1.0002 * delta : play with another delta between the original delta and eta
+    )
+
+    fig = MultiRegionFigure()
+    #fig.add_region(intersection, "intersection")
+    fig.add_region(intersection_2, "intersection_2")
+    fig.add_region(region_from_dp_composition_exact_total_var(eps, delta, eta, 2), "theorem")
+
+    fig.finish_figure(f"epsilon={eps}, delta={delta}, eta={eta}")
+    fig.show_figure()
+
+def composing_dps_intersection_tv_2(eps = 0.9, delta = 0.2, eta = 0.4):
+
+    intersection = intersect_regions([
+        region_from_dp_composition_exact(eps, delta, 2),  # (eps, delta)-DP x (eps, delta) - DP
+        region_from_dp_params(0, 1 - (1 - eta) * (1 - eta)),  # (0, eta)-DP x (0, eta)-DP
+        region_from_dp_composition_simplified([eps, 0], [delta, eta], delta_slack=0.001)  # (eps, delta)-DP x (0, eta)-DP
+        ]
+    )
+
+    fig = MultiRegionFigure()
+    fig.add_region(intersection, "intersection 2")
+    fig.finish_figure(f"epsilon={eps}, delta={delta}, eta={eta}")
+    fig.show_figure()
+
+def composing_dps_theorem_tv(eps = 0.9, delta = 0.2, eta = 0.4):
+    fig = MultiRegionFigure()
+    fig.add_region(region_from_dp_composition_exact_total_var(eps, delta, eta, 2), "theorem")
+    fig.finish_figure()
+    fig.show_figure()
+
+def composing_dps_comp(eps = 0.9, delta = 0.2, eta = 0.4):
+    fig = MultiRegionFigure()
+    fig.add_region(region_from_dp_params(eps, 1 - (1-delta) * (1-eta)), "dp")
+    fig.add_region(region_from_dp_composition_simplified([eps, 0], [delta, eta], delta_slack=0.001), "slack")
+    fig.finish_figure()
+    fig.show_figure()
+
+
+composing_dps_intersection_tv()

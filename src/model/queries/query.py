@@ -22,3 +22,8 @@ class DPQuery(Query):
     def utility(self, *args, **kwargs):
         pass
 
+    @staticmethod
+    @abstractmethod
+    def utility_func(*args, **kwargs):
+        pass
+

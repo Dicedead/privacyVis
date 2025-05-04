@@ -36,7 +36,11 @@ class GaussianMechanism(AdditiveMechanism):
         return 2 * stats.norm.cdf(self._mu / 2) - 1
 
     def noise_scale(self) -> float:
-        return np.sqrt(2 * np.log(5/(4 * self._delta)) * ((self._l2_sens / self._eps) ** 2))
+        return GaussianMechanism.noise_scale_func(self._eps, self._delta, self._l2_sens)
+
+    @staticmethod
+    def noise_scale_func(eps, delta, l2_sens):
+        return np.sqrt(2 * np.log(5 / (4 * delta)) * ((l2_sens / eps) ** 2))
 
     def generate_noise(self, size) -> np.ndarray:
         return np.random.normal(loc=0, scale=self.noise_scale(), size=size)

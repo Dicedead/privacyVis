@@ -36,18 +36,19 @@ class Histogram(Query, L1Sensitivity):
         return 2.
 
 class DPHistogram(DPQuery):
+
     def __init__(self, eps: float, num_bins: int):
         super().__init__(eps, 0)
         self._hist = Histogram(num_bins)
         self._laplace = LaplaceMechanism(eps, self._hist.l1_sens())
 
-    def utility(self) -> float:
-        """
-        Return Laplacian noise scale.
+    def utility(self) -> float: # mse
+        return DPHistogram.utility_func(hist_eps=self._eps, hist_l1_sens=self._hist.l1_sens())
 
-        :return: float
-        """
-        return self._laplace.noise_scale()
+    @staticmethod
+    def utility_func(*args, **kwargs): # mse
+        # TODO replace L1 sens by diameter over dataset size
+        return 2 * (LaplaceMechanism.noise_scale_func(kwargs["hist_eps"], kwargs["hist_l1_sens"]) ** 2)
 
     def apply(self, x: np.ndarray) -> Any:
         return self._laplace(self._hist.apply(x))
