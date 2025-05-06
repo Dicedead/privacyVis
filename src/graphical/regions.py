@@ -56,14 +56,17 @@ def draw_single_region_from_constraints(
     plt.show()
 
 
-
 class MultiRegionFigure:
     def __init__(self,
         start_grid=0,
         stop_grid=1,
         grid_res=600,
-        palette=None
+        palette=None,
+        figsize=(5, 5),
+        dpi=200
     ):
+        self._fig = plt.figure(figsize=figsize, dpi=dpi)
+        self._plot = self._fig.add_subplot()
         d = np.linspace(start_grid, stop_grid, num=grid_res)
         self._k = 1
         self._x, self._y = np.meshgrid(d, d)
@@ -78,7 +81,7 @@ class MultiRegionFigure:
 
     def add_region(self, constraints: Sequence[Constraint], label: str):
         applied_constraints = [constraint(self._x, self._y) for constraint in constraints]
-        plt.imshow(self._palette[self._k * (reduce(lambda c1, c2: c1 & c2, applied_constraints)).astype(int)],
+        self._plot.imshow(self._palette[self._k * (reduce(lambda c1, c2: c1 & c2, applied_constraints)).astype(int)],
                    extent=(self._start, self._stop, self._start, self._stop),
                    origin="lower")
         self._labels.append(label)
@@ -87,16 +90,14 @@ class MultiRegionFigure:
     def finish_figure(self, title=""):
         patches = [mpatches.Patch(color=self._palette[i+1]/255., label=lab)
                    for i, lab in enumerate(self._labels)]
-        plt.legend(handles=patches)
-        plt.xlim(self._start, self._stop)
-        plt.ylim(self._start, self._stop)
-        plt.xlabel('FN')
-        plt.ylabel('FP')
-        plt.title(title)
+        self._plot.legend(handles=patches)
+        self._plot.set(xlim=(self._start, self._stop), ylim=(self._start, self._stop))
+        self._plot.set_title(title)
+        self._plot.set(xlabel="FN", ylabel="FP")
 
     def show_figure(self):
-        plt.show()
+        self._fig.show()
 
     def save_figure(self, path):
-        plt.savefig(path=path)
+        self._fig.savefig(fname=path)
 

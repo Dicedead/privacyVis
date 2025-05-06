@@ -118,4 +118,4 @@ def composing_dps_comp(eps = 0.9, delta = 0.2, eta = 0.4):
     fig.show_figure()
 
 
-composing_dps_intersection_tv()
+randomized_resp()
