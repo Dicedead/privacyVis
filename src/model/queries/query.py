@@ -1,7 +1,7 @@
 import numpy as np
 
 from abc import ABC, abstractmethod
-from typing import Callable, Any
+from typing import Callable, Any, Dict, Tuple, List
 
 
 class Query(ABC, Callable[[np.ndarray], Any]):
@@ -27,3 +27,27 @@ class DPQuery(Query):
     def utility_func(*args, **kwargs):
         pass
 
+    @staticmethod
+    @abstractmethod
+    def pretty_name() -> str:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def params() -> List[str]:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def params_to_labels() -> Dict[str, str]:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def params_to_kwargs() -> Dict[str, str]:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def params_to_limits() -> Dict[str, Tuple[float, float]]:
+        pass

@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict, Tuple, List
 
 import numpy as np
 
@@ -47,8 +47,37 @@ class DPHistogram(DPQuery):
 
     @staticmethod
     def utility_func(*args, **kwargs): # mse
-        # TODO replace L1 sens by diameter over dataset size
+        # TODO replace L1 sens by diameter over dataset size, adding 2 kwargs
         return 2 * (LaplaceMechanism.noise_scale_func(kwargs["hist_eps"], kwargs["hist_l1_sens"]) ** 2)
+
+    @staticmethod
+    def pretty_name() -> str:
+        return "histogram"
 
     def apply(self, x: np.ndarray) -> Any:
         return self._laplace(self._hist.apply(x))
+
+    @staticmethod
+    def params() -> List[str]:
+        return ["eps", "l1_sens"]
+
+    @staticmethod
+    def params_to_labels() -> Dict[str, str]:
+        return {
+            "eps": "$\\epsilon$",
+            "l1_sens": "$\\Delta_1$"
+        }
+
+    @staticmethod
+    def params_to_kwargs() -> Dict[str, str]:
+        return {
+            "eps": "hist_eps",
+            "l1_sens": "hist_l1_sens",
+        }
+
+    @staticmethod
+    def params_to_limits() -> Dict[str, Tuple[float, float]]:
+        return {
+            "eps": (1e-5,1e1),
+            "l1_sens": (0.5, 10),
+        }
