@@ -73,12 +73,13 @@ def composing_dps_intersection_tv(eps = 0.5, delta = 0.1, eta_factor = 0.75):
         region_from_dp_params(eps, 1 - (1-delta) * (1-eta)) # (eps, delta)-DP x (0, eta)-DP
         ]
     )
+    factor = 0.2
 
     intersection_2 = intersect_regions([
         region_from_dp_composition_exact(eps, delta, 2),  # (eps, delta)-DP x (eps, delta) - DP
         region_from_dp_params(0, 1 - (1 - eta) * (1 - eta)),  # (0, eta)-DP x (0, eta)-DP
         region_from_dp_params(eps, 1 - (1-delta) * (1-eta)), # (eps, delta)-DP x (0, eta)-DP
-        region_from_dp_composition_exact(np.log(((1 - 1.0002 * delta)/(1-delta)) * (1 + np.exp(eps)) - 1), 2 * delta, 2)
+        region_from_dp_composition_exact(np.log(((1 - factor * delta)/(1-delta)) * (1 + np.exp(eps)) - 1), delta, 2)
         ] # instead of 1.0002 * delta : play with another delta between the original delta and eta
     )
 
@@ -117,5 +118,35 @@ def composing_dps_comp(eps = 0.9, delta = 0.2, eta = 0.4):
     fig.finish_figure()
     fig.show_figure()
 
+def composition_heter():
+    eps_1 = 0.5
+    eps_2 = eps_1
+    delta_1 = 0.2
+    delta_2 = delta_1
 
-randomized_resp()
+    fig_1 = MultiRegionFigure()
+    fig_1.add_region(region_from_dp_params(eps_1, delta_1), "1")
+    fig_1.finish_figure("eps1-delta1")
+    fig_1.show_figure()
+
+    fig_2 = MultiRegionFigure()
+    fig_2.add_region(region_from_dp_params(eps_2, delta_2), "2")
+    fig_2.finish_figure("eps2-delta2")
+    fig_2.show_figure()
+
+    fig = MultiRegionFigure(grid_res=1000)
+    ls = []
+    for delta_s in np.logspace(-5, 0, num=500):
+        ls.append(region_from_dp_composition_simplified([eps_1, eps_2], [delta_1, delta_2], delta_s))
+
+    fig.add_region(intersect_regions(ls), "intersection thm 3.5")
+    fig.finish_figure()
+    fig.show_figure()
+
+    fig_prime = MultiRegionFigure()
+    fig_prime.add_region(region_from_dp_composition_exact(eps_1, delta_1, 2), "exact")
+    fig_prime.finish_figure()
+    fig_prime.show_figure()
+
+
+composition_heter()

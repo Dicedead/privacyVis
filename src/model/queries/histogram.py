@@ -40,6 +40,7 @@ class DPHistogram(DPQuery):
     def __init__(self, eps: float, num_bins: int):
         super().__init__(eps, 0)
         self._hist = Histogram(num_bins)
+        # TODO utility is num of bins times variance
         self._laplace = LaplaceMechanism(eps, self._hist.l1_sens())
 
     def utility(self) -> float: # mse
@@ -56,6 +57,9 @@ class DPHistogram(DPQuery):
 
     def apply(self, x: np.ndarray) -> Any:
         return self._laplace(self._hist.apply(x))
+
+    def privacy_region(self, *args, **kwargs):
+        return self._laplace.region_exact()
 
     @staticmethod
     def params() -> List[str]:
@@ -78,6 +82,7 @@ class DPHistogram(DPQuery):
     @staticmethod
     def params_to_limits() -> Dict[str, Tuple[float, float]]:
         return {
-            "eps": (1e-5,1e1),
+            "eps": (1e-5, 1e1),
             "l1_sens": (0.5, 10),
         }
+

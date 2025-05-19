@@ -22,6 +22,11 @@ class DPQuery(Query):
     def utility(self, *args, **kwargs):
         pass
 
+    @abstractmethod
+    def privacy_region(self, *args, **kwargs):
+        pass
+
+
     @staticmethod
     @abstractmethod
     def utility_func(*args, **kwargs):
@@ -51,3 +56,4 @@ class DPQuery(Query):
     @abstractmethod
     def params_to_limits() -> Dict[str, Tuple[float, float]]:
         pass
+

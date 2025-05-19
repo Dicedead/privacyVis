@@ -8,6 +8,7 @@ from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
 
 from histogram import DPHistogram
 from query import DPQuery
+from regions import MultiRegionFigure
 
 
 # plot function is created for
@@ -70,13 +71,22 @@ from query import DPQuery
 class UtilityWindow:
     def __init__(self,
         dpqcls: Type[DPQuery],
-        window_size="700x700"
+        window_size="1200x700"
     ):
         self._dpqcls = dpqcls
 
         self._window = tk.Tk()
         self._window.title(f"Utility / Privacy trade-off for the {dpqcls.pretty_name()} query")
         self._window.geometry(window_size)
+
+        self._window.rowconfigure(0, weight=6)
+        self._window.rowconfigure(1, weight=1)
+        self._window.rowconfigure(2, weight=5)
+        self._window.columnconfigure(0, weight=1)
+        self._window.columnconfigure(1, weight=1)
+
+        #self._window.resizable(width=False, height=False)
+        self._window.configure(background="white")
 
     def plot_utility(self, main_param: str, other_params: Dict[str, float]):
         fig = Figure(figsize=(6, 6), dpi=100)
@@ -93,14 +103,21 @@ class UtilityWindow:
 
         plot1.plot(self._dpqcls.utility_func(**kwargs_builder))
 
-        canvas = FigureCanvasTkAgg(fig, master=self._window)
-        canvas.draw()
-        canvas.get_tk_widget().pack()
+        utility_canvas = FigureCanvasTkAgg(fig, master=self._window)
+        utility_toolbar_frame = tk.Frame(self._window)
+        utility_toolbar = NavigationToolbar2Tk(utility_canvas, utility_toolbar_frame)
+        utility_toolbar_frame.grid(column=0, row=1)
+        utility_canvas.get_tk_widget().grid(column=0, row=0)
 
-        toolbar = NavigationToolbar2Tk(canvas, self._window)
-        toolbar.update()
+        privacy_fig = MultiRegionFigure()
+        privacy_fig.add_region(DPHistogram(0.1, 5).privacy_region(), "Hist")
+        privacy_fig.finish_figure("Differential privacy")
 
-        canvas.get_tk_widget().pack()
+        privacy_canvas = FigureCanvasTkAgg(privacy_fig.get_figure(), master=self._window)
+        privacy_toolbar_frame = tk.Frame(self._window)
+        privacy_toolbar = NavigationToolbar2Tk(privacy_canvas, privacy_toolbar_frame)
+        privacy_toolbar_frame.grid(column=1, row=1)
+        privacy_canvas.get_tk_widget().grid(column=1, row=0)
 
         self._window.mainloop()
 

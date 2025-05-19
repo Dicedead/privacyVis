@@ -62,8 +62,8 @@ class MultiRegionFigure:
         stop_grid=1,
         grid_res=600,
         palette=None,
-        figsize=(5, 5),
-        dpi=200
+        figsize=(6, 6),
+        dpi=100
     ):
         self._fig = plt.figure(figsize=figsize, dpi=dpi)
         self._plot = self._fig.add_subplot()
@@ -97,6 +97,9 @@ class MultiRegionFigure:
 
     def show_figure(self):
         self._fig.show()
+
+    def get_figure(self):
+        return self._fig
 
     def save_figure(self, path):
         self._fig.savefig(fname=path)
