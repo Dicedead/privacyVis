@@ -3,7 +3,7 @@ import numpy as np
 from laplace_mechanism import LaplaceMechanism
 from sensitivities import L1Sensitivity
 from query import Query, DPQuery
-from typing import Any
+from typing import Any, Dict, Tuple, List
 
 
 class Mean(Query, L1Sensitivity):
@@ -25,13 +25,38 @@ class FiniteAlphabetMean(Mean):
 
 class DPMean(DPQuery):
 
+    # TODO implement these for the mean
+    def privacy_region(self, *args, **kwargs):
+        pass
+
+    @staticmethod
+    def pretty_name() -> str:
+        pass
+
+    @staticmethod
+    def params() -> List[str]:
+        pass
+
+    @staticmethod
+    def params_to_labels() -> Dict[str, str]:
+        pass
+
+    @staticmethod
+    def params_to_kwargs() -> Dict[str, str]:
+        pass
+
+    @staticmethod
+    def params_to_limits() -> Dict[str, Tuple[float, float]]:
+        pass
+
+    @staticmethod
+    def params_to_log() -> Dict[str, bool]:
+        pass
+
     def __init__(self, alphabet: np.ndarray, dataset_size: int, eps: float):
         self._mean = Mean(np.max(alphabet) - np.min(alphabet), dataset_size)
         self._laplace = LaplaceMechanism(eps, self._mean.l1_sens())
         super().__init__(eps, 0)
-
-    def utility(self):
-        return DPMean.utility_func(hist_eps=self._eps, hist_l1_sens=self._mean.l1_sens())
 
     @staticmethod
     def utility_func(*args, **kwargs):

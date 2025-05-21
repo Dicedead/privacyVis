@@ -1,5 +1,5 @@
 import tkinter as tk
-from typing import List, Dict, Type
+from typing import List, Dict, Type, MutableSet
 
 import numpy as np
 from matplotlib.figure import Figure
@@ -71,7 +71,7 @@ from regions import MultiRegionFigure
 class UtilityWindow:
     def __init__(self,
         dpqcls: Type[DPQuery],
-        window_size="1200x700"
+        window_size="1200x900"
     ):
         self._dpqcls = dpqcls
 
@@ -79,9 +79,9 @@ class UtilityWindow:
         self._window.title(f"Utility / Privacy trade-off for the {dpqcls.pretty_name()} query")
         self._window.geometry(window_size)
 
-        self._window.rowconfigure(0, weight=6)
+        self._window.rowconfigure(0, weight=11)
         self._window.rowconfigure(1, weight=1)
-        self._window.rowconfigure(2, weight=5)
+        self._window.rowconfigure(2, weight=9)
         self._window.columnconfigure(0, weight=1)
         self._window.columnconfigure(1, weight=1)
 
@@ -89,11 +89,14 @@ class UtilityWindow:
         self._window.configure(background="white")
 
     def plot_utility(self, main_param: str, other_params: Dict[str, float]):
-        fig = Figure(figsize=(6, 6), dpi=100)
-        plot1 = fig.add_subplot()
+        utility_fig = Figure(figsize=(6, 6), dpi=100)
+
+        utility_plot = utility_fig.add_subplot()
 
         kwargs_builder = {
-            self._dpqcls.params_to_kwargs()[main_param]:np.logspace(*self._dpqcls.params_to_limits()[main_param])
+            self._dpqcls.params_to_kwargs()[main_param]:
+                np.logspace(*self._dpqcls.params_to_limits()[main_param]) if self._dpqcls.params_to_log()
+                else np.linspace(*self._dpqcls.params_to_limits()[main_param])
         }
 
         for other_param in other_params.keys():
@@ -101,23 +104,29 @@ class UtilityWindow:
                 {self._dpqcls.params_to_kwargs()[other_param]: other_params[other_param]}
             )
 
-        plot1.plot(self._dpqcls.utility_func(**kwargs_builder))
+        utility_plot.plot(self._dpqcls.utility_func(**kwargs_builder))
+        utility_plot.set_title("Utility")
 
-        utility_canvas = FigureCanvasTkAgg(fig, master=self._window)
+        utility_canvas = FigureCanvasTkAgg(utility_fig, master=self._window)
         utility_toolbar_frame = tk.Frame(self._window)
         utility_toolbar = NavigationToolbar2Tk(utility_canvas, utility_toolbar_frame)
-        utility_toolbar_frame.grid(column=0, row=1)
+        utility_toolbar_frame.grid(column=0, row=1, sticky="n")
         utility_canvas.get_tk_widget().grid(column=0, row=0)
 
         privacy_fig = MultiRegionFigure()
-        privacy_fig.add_region(DPHistogram(0.1, 5).privacy_region(), "Hist")
+        #privacy_fig.add_region(DPHistogram(0.1, 5).privacy_region(), "Hist")
         privacy_fig.finish_figure("Differential privacy")
 
         privacy_canvas = FigureCanvasTkAgg(privacy_fig.get_figure(), master=self._window)
         privacy_toolbar_frame = tk.Frame(self._window)
         privacy_toolbar = NavigationToolbar2Tk(privacy_canvas, privacy_toolbar_frame)
-        privacy_toolbar_frame.grid(column=1, row=1)
+        privacy_toolbar_frame.grid(column=1, row=1, sticky="n")
         privacy_canvas.get_tk_widget().grid(column=1, row=0)
+
+        bogus_fig = MultiRegionFigure(figsize=(4,4))
+        #bogus_fig.add_region(DPHistogram(0.1, 5).privacy_region(), "Hist bogus")
+        bottom_fig = FigureCanvasTkAgg(bogus_fig.get_figure(), master=self._window)
+        bottom_fig.get_tk_widget().grid(column=0, row=2, columnspan=2)
 
         self._window.mainloop()
 

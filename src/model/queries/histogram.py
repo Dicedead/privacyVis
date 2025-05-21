@@ -43,9 +43,6 @@ class DPHistogram(DPQuery):
         # TODO utility is num of bins times variance
         self._laplace = LaplaceMechanism(eps, self._hist.l1_sens())
 
-    def utility(self) -> float: # mse
-        return DPHistogram.utility_func(hist_eps=self._eps, hist_l1_sens=self._hist.l1_sens())
-
     @staticmethod
     def utility_func(*args, **kwargs): # mse
         # TODO replace L1 sens by diameter over dataset size, adding 2 kwargs
@@ -82,7 +79,14 @@ class DPHistogram(DPQuery):
     @staticmethod
     def params_to_limits() -> Dict[str, Tuple[float, float]]:
         return {
-            "eps": (1e-5, 1e1),
+            "eps": (-5, 1),
             "l1_sens": (0.5, 10),
+        }
+
+    @staticmethod
+    def params_to_log() -> Dict[str, bool]:
+        return {
+            "eps": True,
+            "l1_sens": False
         }
 

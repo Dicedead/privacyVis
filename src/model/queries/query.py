@@ -18,14 +18,10 @@ class DPQuery(Query):
         self._eps = eps
         self._delta = delta
 
-    @abstractmethod
-    def utility(self, *args, **kwargs):
-        pass
 
     @abstractmethod
     def privacy_region(self, *args, **kwargs):
         pass
-
 
     @staticmethod
     @abstractmethod
@@ -55,5 +51,10 @@ class DPQuery(Query):
     @staticmethod
     @abstractmethod
     def params_to_limits() -> Dict[str, Tuple[float, float]]:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def params_to_log() -> Dict[str, bool]:
         pass
 
