@@ -137,4 +137,7 @@ class MultiRegionFigure:
         if two_contains_one and not one_contains_two:
             return -1
 
-        return 0
+        if one_contains_two and two_contains_one:
+            return 0
+
+        return diff.sum()

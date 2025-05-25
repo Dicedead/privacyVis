@@ -148,5 +148,11 @@ def composition_heter():
     fig_prime.finish_figure()
     fig_prime.show_figure()
 
+def superpose():
+    fig = MultiRegionFigure()
+    fig.add_region(region_from_dp_params(0.8, 0), "(0.3, 0)")
+    fig.add_region(region_from_dp_params(0.1, 0.2), "0.1, 0.2)")
+    fig.draw_figure()
+    fig.show_figure()
 
-gdp()
+superpose()
