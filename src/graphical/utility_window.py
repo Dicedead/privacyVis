@@ -114,7 +114,7 @@ class UtilityWindow:
         utility_canvas.get_tk_widget().grid(column=0, row=0)
 
         privacy_fig = MultiRegionFigure()
-        #privacy_fig.add_region(DPHistogram(0.1, 5).privacy_region(), "Hist")
+        privacy_fig.add_region(DPHistogram(0.1, 5).privacy_region(), "Hist")
         privacy_fig.finish_figure("Differential privacy")
 
         privacy_canvas = FigureCanvasTkAgg(privacy_fig.get_figure(), master=self._window)

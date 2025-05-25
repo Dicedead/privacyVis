@@ -17,10 +17,10 @@ def draw_multiple_regions():
 
 def gdp():
     fig = MultiRegionFigure()
-    fig.add_region(region_from_gaussian_dp(2), "2")
-    fig.add_region(region_from_gaussian_dp(1), "1")
     fig.add_region(region_from_gaussian_dp(0.4), "0.4")
     fig.add_region(region_from_gaussian_dp(0.1), "0.1")
+    fig.add_region(region_from_gaussian_dp(2), "2")
+    fig.add_region(region_from_gaussian_dp(1), "1")
     fig.finish_figure()
     fig.show_figure()
 
@@ -149,4 +149,4 @@ def composition_heter():
     fig_prime.show_figure()
 
 
-composition_heter()
+gdp()

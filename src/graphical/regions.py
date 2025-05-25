@@ -1,11 +1,12 @@
 import copy
+import functools
 
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
-from definitions import Constraint
-from typing import Sequence
+from definitions import Constraint, Region
+from typing import Sequence, List, Tuple
 from functools import reduce
 
 from palettes import colourblind_palette
@@ -68,7 +69,7 @@ class MultiRegionFigure:
         self._fig = plt.figure(figsize=figsize, dpi=dpi)
         self._plot = self._fig.add_subplot()
         d = np.linspace(start_grid, stop_grid, num=grid_res)
-        self._k = 1
+        self._labelled_regions: List[Tuple[Sequence[Constraint], str]] = []
         self._x, self._y = np.meshgrid(d, d)
         self._start = start_grid
         self._stop = stop_grid
@@ -80,14 +81,20 @@ class MultiRegionFigure:
         self._palette = np.array(palette)
 
     def add_region(self, constraints: Sequence[Constraint], label: str):
-        applied_constraints = [constraint(self._x, self._y) for constraint in constraints]
-        self._plot.imshow(self._palette[self._k * (reduce(lambda c1, c2: c1 & c2, applied_constraints)).astype(int)],
-                   extent=(self._start, self._stop, self._start, self._stop),
-                   origin="lower")
-        self._labels.append(label)
-        self._k += 1
+        double = (constraints, label)
+        self._labelled_regions.append(double)
 
     def finish_figure(self, title=""):
+        self.draw_figure(title=title)
+
+    def draw_figure(self, title=""):
+        for idx, labelled_computed_region in enumerate(self._compute_and_sort_regions(self._labelled_regions)):
+            k = idx + 1
+            computed_region, label = labelled_computed_region
+            self._plot.imshow(self._palette[k * computed_region],
+                       extent=(self._start, self._stop, self._start, self._stop),
+                       origin="lower")
+            self._labels.append(label)
         patches = [mpatches.Patch(color=self._palette[i+1]/255., label=lab)
                    for i, lab in enumerate(self._labels)]
         self._plot.legend(handles=patches)
@@ -104,3 +111,30 @@ class MultiRegionFigure:
     def save_figure(self, path):
         self._fig.savefig(fname=path)
 
+    def _compute_region(self, region: Region):
+        applied_constraints = [constraint(self._x, self._y) for constraint in region]
+        return reduce(lambda c1, c2: c1 & c2, applied_constraints).astype(int)
+
+    def _compute_and_sort_regions(self, labelled_regions: List[Tuple[Sequence[Constraint], str]])\
+            -> List[Tuple[np.ndarray, str]]:
+        computed_labelled_regions = [
+            (self._compute_region(reg), label) for (reg, label) in labelled_regions
+        ]
+
+        computed_labelled_regions.sort(key=functools.cmp_to_key(MultiRegionFigure._compare_regions), reverse=True)
+
+        return computed_labelled_regions
+
+    @staticmethod
+    def _compare_regions(region1: Tuple[np.ndarray, str], region2: Tuple[np.ndarray, str]) -> int:
+        diff = region1[0] - region2[0]
+        one_contains_two = np.all(diff >= 0)
+        two_contains_one = np.all(-diff >= 0)
+
+        if one_contains_two and not two_contains_one:
+            return 1
+
+        if two_contains_one and not one_contains_two:
+            return -1
+
+        return 0
