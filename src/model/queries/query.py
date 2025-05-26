@@ -58,3 +58,13 @@ class DPQuery(Query):
     def params_to_log() -> Dict[str, bool]:
         pass
 
+    @staticmethod
+    @abstractmethod
+    def params_to_default_vals() -> Dict[str, float]:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def utility_label() -> str:
+        pass
+

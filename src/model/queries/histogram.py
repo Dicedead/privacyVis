@@ -4,7 +4,7 @@ import numpy as np
 
 from laplace_mechanism import LaplaceMechanism
 from sensitivities import L1Sensitivity
-from query import Query,DPQuery
+from query import Query, DPQuery
 
 
 class Histogram(Query, L1Sensitivity):
@@ -40,12 +40,13 @@ class DPHistogram(DPQuery):
     def __init__(self, eps: float, num_bins: int):
         super().__init__(eps, 0)
         self._hist = Histogram(num_bins)
-        # TODO utility is num of bins times variance
+        self._num_bins = num_bins
         self._laplace = LaplaceMechanism(eps, self._hist.l1_sens())
 
     @staticmethod
     def utility_func(*args, **kwargs): # mse
         # TODO replace L1 sens by diameter over dataset size, adding 2 kwargs
+        # TODO utility is num of bins times variance
         return 2 * (LaplaceMechanism.noise_scale_func(kwargs["hist_eps"], kwargs["hist_l1_sens"]) ** 2)
 
     @staticmethod
@@ -89,4 +90,15 @@ class DPHistogram(DPQuery):
             "eps": True,
             "l1_sens": False
         }
+
+    @staticmethod
+    def params_to_default_vals() -> Dict[str, float]:
+        return {
+            "eps": 0.6,
+            "l1_sens": 1
+        }
+
+    @staticmethod
+    def utility_label() -> str:
+        return "MSE"
 
