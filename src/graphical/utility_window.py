@@ -1,3 +1,4 @@
+import copy
 import tkinter as tk
 from typing import List, Dict, Type, MutableSet
 
@@ -6,6 +7,7 @@ import numpy as np
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
                                                NavigationToolbar2Tk)
+from mpmath import limit
 
 from histogram import DPHistogram
 from query import DPQuery
@@ -32,7 +34,12 @@ class UtilityWindow:
         #self._window.resizable(width=False, height=False)
         self._window.configure(background="white")
 
+        param_to_defaults = self._dpqcls.params_to_default_vals()
+        self._param_vals = {param: tk.DoubleVar(value=val) for param, val in param_to_defaults.items()}
+
+
     def build_window(self, main_param: str):
+        self.build_sliders()
         self.plot_utility(main_param)
         self.plot_privacy()
         self.plot_example()
@@ -54,8 +61,10 @@ class UtilityWindow:
 
         kwargs_builder.update({self._dpqcls.params_to_kwargs()[main_param]: x_vals})
 
-        other_params = self._dpqcls.params_to_default_vals()
+        other_params = {param: val.get() for param, val in self._param_vals.items()}
         other_params.pop(main_param)
+        print(other_params)
+
         for other_param in other_params.keys():
             kwargs_builder.update(
                 {self._dpqcls.params_to_kwargs()[other_param]: other_params[other_param]}
@@ -87,7 +96,20 @@ class UtilityWindow:
         bogus_fig = MultiRegionFigure(figsize=(5,5))
         #bogus_fig.add_region(DPHistogram(0.1, 5).privacy_region(), "Hist bogus")
         bottom_fig = FigureCanvasTkAgg(bogus_fig.get_figure(), master=self._window)
-        bottom_fig.get_tk_widget().grid(column=1, row=2, columnspan=2)
+        bottom_fig.get_tk_widget().grid(column=1, row=2)
+
+    def build_sliders(self):
+        slider_frame = tk.Frame(self._window)
+
+        param_list = self._dpqcls.params_to_default_vals().keys()
+        limit_map = self._dpqcls.params_to_limits()
+        for param in param_list:
+            a, b = limit_map[param]
+            scale = tk.Scale(slider_frame, from_=a, to=b, orient=tk.HORIZONTAL, variable=self._param_vals[param],
+                             resolution=0.1, background="white")
+            scale.pack()
+
+        slider_frame.grid(column=0, row=2)
 
 if __name__ == "__main__":
     utility_window = UtilityWindow(DPHistogram)
