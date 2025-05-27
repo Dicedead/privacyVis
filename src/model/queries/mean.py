@@ -38,7 +38,7 @@ class DPMean(DPQuery):
         pass
 
     @staticmethod
-    def params_to_labels() -> Dict[str, str]:
+    def params_to_graph_labels() -> Dict[str, str]:
         pass
 
     @staticmethod

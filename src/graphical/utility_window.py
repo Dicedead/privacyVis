@@ -63,7 +63,6 @@ class UtilityWindow:
 
         other_params = {param: val.get() for param, val in self._param_vals.items()}
         other_params.pop(main_param)
-        print(other_params)
 
         for other_param in other_params.keys():
             kwargs_builder.update(
@@ -71,7 +70,7 @@ class UtilityWindow:
             )
 
         utility_plotting_func(x_vals, self._dpqcls.utility_func(**kwargs_builder))
-        utility_plot.set_xlabel(self._dpqcls.params_to_labels()[main_param])
+        utility_plot.set_xlabel(self._dpqcls.params_to_graph_labels()[main_param])
         utility_plot.set_ylabel(self._dpqcls.utility_label())
         utility_plot.set_title("Utility")
 
@@ -103,11 +102,21 @@ class UtilityWindow:
 
         param_list = self._dpqcls.params_to_default_vals().keys()
         limit_map = self._dpqcls.params_to_limits()
-        for param in param_list:
+        labels_map = self._dpqcls.params_to_slider_labels()
+
+        slider_frame.columnconfigure(0, weight=1)
+        slider_frame.columnconfigure(1, weight=5)
+        for idx, param in enumerate(param_list):
+            slider_frame.rowconfigure(idx, weight=1)
             a, b = limit_map[param]
             scale = tk.Scale(slider_frame, from_=a, to=b, orient=tk.HORIZONTAL, variable=self._param_vals[param],
                              resolution=0.1, background="white")
-            scale.pack()
+            # TODO replot the utility plot on command
+            scale.grid(column=1, row=idx)
+
+            label = tk.Label(slider_frame, text=labels_map[param])
+            label.grid(column=0, row=idx)
+
 
         slider_frame.grid(column=0, row=2)
 

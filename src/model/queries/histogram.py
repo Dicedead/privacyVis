@@ -64,9 +64,16 @@ class DPHistogram(DPQuery):
         return ["eps", "l1_sens"]
 
     @staticmethod
-    def params_to_labels() -> Dict[str, str]:
+    def params_to_slider_labels() -> Dict[str, str]:
         return {
-            "eps": "$\\log_{10}(\\epsilon)$",
+            "eps": "log(epsilon)",
+            "l1_sens": "Sensitivity"
+        }
+
+    @staticmethod
+    def params_to_graph_labels() -> Dict[str, str]:
+        return {
+            "eps": "$\\epsilon$",
             "l1_sens": "$\\Delta_1$"
         }
 
