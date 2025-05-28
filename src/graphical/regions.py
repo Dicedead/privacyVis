@@ -108,6 +108,11 @@ class MultiRegionFigure:
     def get_figure(self):
         return self._fig
 
+    def clear_figure(self):
+        self._labelled_regions.clear()
+        self._labels.clear()
+        return self._plot.clear()
+
     def save_figure(self, path):
         self._fig.savefig(fname=path)
 

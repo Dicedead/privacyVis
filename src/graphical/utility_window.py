@@ -10,7 +10,7 @@ from histogram import DPHistogram
 from query import DPQuery
 from regions import MultiRegionFigure
 
-_RESOLUTION_NON_INTEGER = 0.1
+_RESOLUTION_NON_INTEGER = 0.05
 _RESOLUTION_INTEGER = 1
 _SLIDER_LENGTH = 300
 
@@ -36,7 +36,10 @@ class UtilityWindow:
 
         param_to_defaults = self._dpqcls.params_to_default_vals()
         self._param_vals = {param: tk.DoubleVar(value=val) for param, val in param_to_defaults.items()}
-        self._utility_canvas = self._utility_plot = None
+        self._utility_canvas = None
+        self._utility_plot = None
+        self._privacy_canvas = None
+        self._privacy_fig = None
 
     def initialize_window(self, main_param: str):
         self.build_sliders(main_param)
@@ -73,7 +76,9 @@ class UtilityWindow:
         kwargs_builder.update({self._dpqcls.params_to_kwargs()[main_param]: x_vals})
 
         other_params = {param: val.get() for param, val in self._param_vals.items()}
-        other_params.pop(main_param)
+        main_param_val = other_params.pop(main_param)
+        if self._dpqcls.params_are_in_logscale()[main_param]:
+            main_param_val = 10 ** main_param_val
 
         for other_param in other_params.keys():
             kwargs_builder.update(
@@ -81,6 +86,7 @@ class UtilityWindow:
             )
 
         utility_plotting_func(x_vals, self._dpqcls.utility_func(**kwargs_builder))
+        utility_plot.axvline(x=main_param_val, color='black', linestyle='--')
         utility_plot.set_xlabel(self._dpqcls.params_to_graph_labels()[main_param])
         utility_plot.set_ylabel(self._dpqcls.utility_label())
         utility_plot.set_title("Utility")
@@ -89,15 +95,38 @@ class UtilityWindow:
         self._utility_canvas.flush_events()
 
     def plot_privacy(self):
-        privacy_fig = MultiRegionFigure()
-        privacy_fig.add_region(DPHistogram(0.1, 5).privacy_region(), "Hist")
-        privacy_fig.finish_figure("Differential privacy")
+        self._privacy_fig = MultiRegionFigure()
+        self._privacy_fig.finish_figure("Differential privacy")
+        self._privacy_canvas = FigureCanvasTkAgg(self._privacy_fig.get_figure(), master=self._window)
 
-        privacy_canvas = FigureCanvasTkAgg(privacy_fig.get_figure(), master=self._window)
+        self.replot_privacy()
+
         privacy_toolbar_frame = tk.Frame(self._window)
-        privacy_toolbar = NavigationToolbar2Tk(privacy_canvas, privacy_toolbar_frame)
+        privacy_toolbar = NavigationToolbar2Tk(self._privacy_canvas, privacy_toolbar_frame)
         privacy_toolbar_frame.grid(column=1, row=1, sticky="n")
-        privacy_canvas.get_tk_widget().grid(column=1, row=0)
+        self._privacy_canvas.get_tk_widget().grid(column=1, row=0)
+
+    def replot_privacy(self):
+        self._privacy_fig.clear_figure()
+        construct_args = {param: self._param_vals[param].get() for param in self._dpqcls.params()}
+        for param in self._dpqcls.params():
+            if self._dpqcls.params_are_in_logscale()[param]:
+                construct_args[param] = 10 ** self._param_vals[param].get()
+
+
+        self._privacy_fig.add_region(
+            self._dpqcls(**construct_args).privacy_region(),
+            "Hist")
+        self._privacy_fig.finish_figure("Differential privacy")
+
+        self._privacy_canvas.draw()
+        self._privacy_canvas.flush_events()
+
+    def replot_privacy_and_utility(self, main_param: str):
+        def func(_):
+            self.replot_utility(main_param)
+            self.replot_privacy()
+        return func
 
     def plot_example(self):
         bogus_fig = MultiRegionFigure(figsize=(5,5))
@@ -109,7 +138,7 @@ class UtilityWindow:
 
         def slider_command(slider_param: str):
             if slider_param == main_param:
-                return lambda x: None
+                return self.replot_privacy_and_utility(main_param)
 
             return lambda x: self.replot_utility(main_param)
 
