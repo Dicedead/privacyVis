@@ -113,5 +113,5 @@ class DPHistogram(DPQuery):
 
     @staticmethod
     def utility_label() -> str:
-        return "MSE"
+        return "Mean squared error"
 
