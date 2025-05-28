@@ -60,7 +60,12 @@ class DPQuery(Query):
 
     @staticmethod
     @abstractmethod
-    def params_to_log() -> Dict[str, bool]:
+    def params_are_in_logscale() -> Dict[str, bool]:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def params_are_integers() -> Dict[str, bool]:
         pass
 
     @staticmethod

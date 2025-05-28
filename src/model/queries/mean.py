@@ -50,7 +50,7 @@ class DPMean(DPQuery):
         pass
 
     @staticmethod
-    def params_to_log() -> Dict[str, bool]:
+    def params_are_in_logscale() -> Dict[str, bool]:
         pass
 
     def __init__(self, alphabet: np.ndarray, dataset_size: int, eps: float):

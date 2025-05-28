@@ -45,9 +45,7 @@ class DPHistogram(DPQuery):
 
     @staticmethod
     def utility_func(*args, **kwargs): # mse
-        # TODO replace L1 sens by diameter over dataset size, adding 2 kwargs
-        # TODO utility is num of bins times variance
-        return 2 * (LaplaceMechanism.noise_scale_func(kwargs["hist_eps"], kwargs["hist_l1_sens"]) ** 2)
+        return 2 * kwargs["hist_num_bins"] * (LaplaceMechanism.noise_scale_func(kwargs["hist_eps"], 2) ** 2)
 
     @staticmethod
     def pretty_name() -> str:
@@ -61,49 +59,57 @@ class DPHistogram(DPQuery):
 
     @staticmethod
     def params() -> List[str]:
-        return ["eps", "l1_sens"]
+        return ["eps", "num_bins"]
 
     @staticmethod
     def params_to_slider_labels() -> Dict[str, str]:
         return {
             "eps": "log(epsilon)",
-            "l1_sens": "Sensitivity"
+            "num_bins": "Number of bins"
         }
 
     @staticmethod
     def params_to_graph_labels() -> Dict[str, str]:
         return {
             "eps": "$\\epsilon$",
-            "l1_sens": "$\\Delta_1$"
+            "num_bins": "Number of bins"
         }
 
     @staticmethod
     def params_to_kwargs() -> Dict[str, str]:
         return {
             "eps": "hist_eps",
-            "l1_sens": "hist_l1_sens",
+            "num_bins": "hist_num_bins",
         }
 
     @staticmethod
     def params_to_limits() -> Dict[str, Tuple[float, float]]:
         return {
             "eps": (-5, 1),
-            "l1_sens": (0.5, 10),
+            "num_bins": (1, 100),
         }
 
     @staticmethod
-    def params_to_log() -> Dict[str, bool]:
+    def params_are_in_logscale() -> Dict[str, bool]:
         return {
             "eps": True,
-            "l1_sens": False
+            "num_bins": False
+        }
+
+    @staticmethod
+    def params_are_integers() -> Dict[str, bool]:
+        return {
+            "eps": False,
+            "num_bins": True
         }
 
     @staticmethod
     def params_to_default_vals() -> Dict[str, float]:
         return {
             "eps": 0.6,
-            "l1_sens": 1.0
+            "num_bins": 10
         }
+
 
     @staticmethod
     def utility_label() -> str:

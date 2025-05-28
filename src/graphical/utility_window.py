@@ -1,18 +1,18 @@
-import copy
 import tkinter as tk
-from typing import List, Dict, Type, MutableSet
+from typing import Type
 
-import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
                                                NavigationToolbar2Tk)
-from mpmath import limit
 
 from histogram import DPHistogram
 from query import DPQuery
 from regions import MultiRegionFigure
 
+_RESOLUTION_NON_INTEGER = 0.1
+_RESOLUTION_INTEGER = 1
+_SLIDER_LENGTH = 300
 
 class UtilityWindow:
     def __init__(self,
@@ -36,10 +36,10 @@ class UtilityWindow:
 
         param_to_defaults = self._dpqcls.params_to_default_vals()
         self._param_vals = {param: tk.DoubleVar(value=val) for param, val in param_to_defaults.items()}
+        self._utility_canvas = self._utility_plot = None
 
-
-    def build_window(self, main_param: str):
-        self.build_sliders()
+    def initialize_window(self, main_param: str):
+        self.build_sliders(main_param)
         self.plot_utility(main_param)
         self.plot_privacy()
         self.plot_example()
@@ -49,10 +49,21 @@ class UtilityWindow:
     def plot_utility(self, main_param: str):
         utility_fig = Figure(figsize=(5, 5), dpi=100)
 
-        utility_plot = utility_fig.add_subplot()
+        self._utility_plot = utility_fig.add_subplot()
+        self._utility_canvas = FigureCanvasTkAgg(utility_fig, master=self._window)
+        self.replot_utility(main_param)
+
+        utility_toolbar_frame = tk.Frame(self._window)
+        utility_toolbar = NavigationToolbar2Tk(self._utility_canvas, utility_toolbar_frame)
+        utility_toolbar_frame.grid(column=0, row=1, sticky="n")
+        self._utility_canvas.get_tk_widget().grid(column=0, row=0)
+
+    def replot_utility(self, main_param: str):
+        utility_plot = self._utility_plot
+        utility_plot.clear()
 
         kwargs_builder = {}
-        if self._dpqcls.params_to_log()[main_param]:
+        if self._dpqcls.params_are_in_logscale()[main_param]:
             x_vals = np.logspace(*self._dpqcls.params_to_limits()[main_param])
             utility_plotting_func = utility_plot.semilogx
         else:
@@ -74,11 +85,8 @@ class UtilityWindow:
         utility_plot.set_ylabel(self._dpqcls.utility_label())
         utility_plot.set_title("Utility")
 
-        utility_canvas = FigureCanvasTkAgg(utility_fig, master=self._window)
-        utility_toolbar_frame = tk.Frame(self._window)
-        utility_toolbar = NavigationToolbar2Tk(utility_canvas, utility_toolbar_frame)
-        utility_toolbar_frame.grid(column=0, row=1, sticky="n")
-        utility_canvas.get_tk_widget().grid(column=0, row=0)
+        self._utility_canvas.draw()
+        self._utility_canvas.flush_events()
 
     def plot_privacy(self):
         privacy_fig = MultiRegionFigure()
@@ -97,21 +105,35 @@ class UtilityWindow:
         bottom_fig = FigureCanvasTkAgg(bogus_fig.get_figure(), master=self._window)
         bottom_fig.get_tk_widget().grid(column=1, row=2)
 
-    def build_sliders(self):
+    def build_sliders(self, main_param: str):
+
+        def slider_command(slider_param: str):
+            if slider_param == main_param:
+                return lambda x: None
+
+            return lambda x: self.replot_utility(main_param)
+
         slider_frame = tk.Frame(self._window)
 
         param_list = self._dpqcls.params_to_default_vals().keys()
         limit_map = self._dpqcls.params_to_limits()
         labels_map = self._dpqcls.params_to_slider_labels()
+        resolution_map = self._dpqcls.params_are_integers()
 
         slider_frame.columnconfigure(0, weight=1)
-        slider_frame.columnconfigure(1, weight=5)
+        slider_frame.columnconfigure(1, weight=10)
         for idx, param in enumerate(param_list):
             slider_frame.rowconfigure(idx, weight=1)
             a, b = limit_map[param]
-            scale = tk.Scale(slider_frame, from_=a, to=b, orient=tk.HORIZONTAL, variable=self._param_vals[param],
-                             resolution=0.1, background="white")
-            # TODO replot the utility plot on command
+            resolution = _RESOLUTION_INTEGER if resolution_map[param] else _RESOLUTION_NON_INTEGER
+            scale = tk.Scale(slider_frame,
+                             from_=a, to=b,
+                             variable=self._param_vals[param],command=slider_command(param),
+                             resolution=resolution,
+                             background="white",
+                             orient=tk.HORIZONTAL,
+                             length=_SLIDER_LENGTH)
+
             scale.grid(column=1, row=idx)
 
             label = tk.Label(slider_frame, text=labels_map[param])
@@ -122,4 +144,4 @@ class UtilityWindow:
 
 if __name__ == "__main__":
     utility_window = UtilityWindow(DPHistogram)
-    utility_window.build_window("eps")
+    utility_window.initialize_window("eps")
