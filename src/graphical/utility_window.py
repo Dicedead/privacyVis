@@ -17,6 +17,7 @@ _SLIDER_LENGTH = 300
 class UtilityWindow:
     def __init__(self,
         dpqcls: Type[DPQuery],
+        main_param: str,
         window_size="1300x900"
     ):
         self._dpqcls = dpqcls
@@ -41,7 +42,6 @@ class UtilityWindow:
         self._privacy_canvas = None
         self._privacy_fig = None
 
-    def initialize_window(self, main_param: str):
         self.build_sliders(main_param)
         self.plot_utility(main_param)
         self.plot_privacy()
@@ -68,7 +68,7 @@ class UtilityWindow:
         kwargs_builder = {}
         if self._dpqcls.params_are_in_logscale()[main_param]:
             x_vals = np.logspace(*self._dpqcls.params_to_limits()[main_param])
-            utility_plotting_func = utility_plot.semilogx
+            utility_plotting_func = utility_plot.loglog
         else:
             x_vals = np.linspace(*self._dpqcls.params_to_limits()[main_param])
             utility_plotting_func = utility_plot.plot
@@ -103,8 +103,8 @@ class UtilityWindow:
 
         privacy_toolbar_frame = tk.Frame(self._window)
         privacy_toolbar = NavigationToolbar2Tk(self._privacy_canvas, privacy_toolbar_frame)
-        privacy_toolbar_frame.grid(column=1, row=1, sticky="n")
-        self._privacy_canvas.get_tk_widget().grid(column=1, row=0)
+        privacy_toolbar_frame.grid(column=1, row=2)
+        self._privacy_canvas.get_tk_widget().grid(column=1, row=0, rowspan=3)
 
     def replot_privacy(self):
         self._privacy_fig.clear_figure()
@@ -116,7 +116,8 @@ class UtilityWindow:
 
         self._privacy_fig.add_region(
             self._dpqcls(**construct_args).privacy_region(),
-            "Hist")
+            f"({", ".join([f'{self._dpqcls.params_to_graph_labels()[param]}: {construct_args[param]:.2f}'
+                           for param in self._dpqcls.params() if self._dpqcls.params_change_privacy()[param]])})")
         self._privacy_fig.finish_figure("Differential privacy")
 
         self._privacy_canvas.draw()
@@ -131,13 +132,13 @@ class UtilityWindow:
     def plot_example(self):
         bogus_fig = MultiRegionFigure(figsize=(5,5))
         #bogus_fig.add_region(DPHistogram(0.1, 5).privacy_region(), "Hist bogus")
-        bottom_fig = FigureCanvasTkAgg(bogus_fig.get_figure(), master=self._window)
-        bottom_fig.get_tk_widget().grid(column=1, row=2)
+        #bottom_fig = FigureCanvasTkAgg(bogus_fig.get_figure(), master=self._window)
+        #bottom_fig.get_tk_widget().grid(column=1, row=2)
 
     def build_sliders(self, main_param: str):
 
         def slider_command(slider_param: str):
-            if slider_param == main_param:
+            if self._dpqcls.params_change_privacy()[slider_param]:
                 return self.replot_privacy_and_utility(main_param)
 
             return lambda x: self.replot_utility(main_param)
@@ -157,20 +158,18 @@ class UtilityWindow:
             resolution = _RESOLUTION_INTEGER if resolution_map[param] else _RESOLUTION_NON_INTEGER
             scale = tk.Scale(slider_frame,
                              from_=a, to=b,
-                             variable=self._param_vals[param],command=slider_command(param),
+                             variable=self._param_vals[param],
+                             command=slider_command(param),
                              resolution=resolution,
                              background="white",
                              orient=tk.HORIZONTAL,
                              length=_SLIDER_LENGTH)
 
             scale.grid(column=1, row=idx)
-
             label = tk.Label(slider_frame, text=labels_map[param])
             label.grid(column=0, row=idx)
-
 
         slider_frame.grid(column=0, row=2)
 
 if __name__ == "__main__":
-    utility_window = UtilityWindow(DPHistogram)
-    utility_window.initialize_window("eps")
+    utility_window = UtilityWindow(DPHistogram, "eps")

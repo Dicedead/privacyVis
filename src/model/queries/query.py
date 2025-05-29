@@ -70,6 +70,11 @@ class DPQuery(Query):
 
     @staticmethod
     @abstractmethod
+    def params_change_privacy() -> Dict[str, bool]:
+        pass
+
+    @staticmethod
+    @abstractmethod
     def params_to_default_vals() -> Dict[str, float]:
         pass
 

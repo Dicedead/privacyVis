@@ -85,7 +85,7 @@ class DPHistogram(DPQuery):
     @staticmethod
     def params_to_limits() -> Dict[str, Tuple[float, float]]:
         return {
-            "eps": (-5, 1),
+            "eps": (-3, 1),
             "num_bins": (1, 100),
         }
 
@@ -104,12 +104,18 @@ class DPHistogram(DPQuery):
         }
 
     @staticmethod
-    def params_to_default_vals() -> Dict[str, float]:
+    def params_change_privacy() -> Dict[str, bool]:
         return {
-            "eps": 0.6,
-            "num_bins": 10
+            "eps": True,
+            "num_bins": False
         }
 
+    @staticmethod
+    def params_to_default_vals() -> Dict[str, float]:
+        return {
+            "eps": np.log10(0.32),
+            "num_bins": 10
+        }
 
     @staticmethod
     def utility_label() -> str:
