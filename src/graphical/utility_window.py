@@ -7,18 +7,20 @@ from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
                                                NavigationToolbar2Tk)
 
 from histogram import DPHistogram
+from mean import DPMean
 from query import DPQuery
 from regions import MultiRegionFigure
 
 _RESOLUTION_NON_INTEGER = 0.05
 _RESOLUTION_INTEGER = 1
 _SLIDER_LENGTH = 300
+_WINDOW_SIZE = "1300x900"
 
 class UtilityWindow:
     def __init__(self,
         dpqcls: Type[DPQuery],
         main_param: str,
-        window_size="1300x900"
+        window_size=_WINDOW_SIZE
     ):
         self._dpqcls = dpqcls
 
@@ -32,7 +34,6 @@ class UtilityWindow:
         self._window.columnconfigure(0, weight=1)
         self._window.columnconfigure(1, weight=1)
 
-        #self._window.resizable(width=False, height=False)
         self._window.configure(background="white")
 
         param_to_defaults = self._dpqcls.params_to_default_vals()
@@ -45,7 +46,6 @@ class UtilityWindow:
         self.build_sliders(main_param)
         self.plot_utility(main_param)
         self.plot_privacy()
-        self.plot_example()
 
         self._window.mainloop()
 
@@ -75,14 +75,16 @@ class UtilityWindow:
 
         kwargs_builder.update({self._dpqcls.params_to_kwargs()[main_param]: x_vals})
 
-        other_params = {param: val.get() for param, val in self._param_vals.items()}
-        main_param_val = other_params.pop(main_param)
-        if self._dpqcls.params_are_in_logscale()[main_param]:
-            main_param_val = 10 ** main_param_val
+        param_vals = {param: val.get() for param, val in self._param_vals.items()}
+        for param in self._dpqcls.params():
+            if self._dpqcls.params_are_in_logscale()[param]:
+                param_vals[param] = 10 ** param_vals[param]
 
-        for other_param in other_params.keys():
+        main_param_val = param_vals.pop(main_param)
+
+        for param in param_vals.keys():
             kwargs_builder.update(
-                {self._dpqcls.params_to_kwargs()[other_param]: other_params[other_param]}
+                {self._dpqcls.params_to_kwargs()[param]: param_vals[param]}
             )
 
         utility_plotting_func(x_vals, self._dpqcls.utility_func(**kwargs_builder))
@@ -129,12 +131,6 @@ class UtilityWindow:
             self.replot_privacy()
         return func
 
-    def plot_example(self):
-        bogus_fig = MultiRegionFigure(figsize=(5,5))
-        #bogus_fig.add_region(DPHistogram(0.1, 5).privacy_region(), "Hist bogus")
-        #bottom_fig = FigureCanvasTkAgg(bogus_fig.get_figure(), master=self._window)
-        #bottom_fig.get_tk_widget().grid(column=1, row=2)
-
     def build_sliders(self, main_param: str):
 
         def slider_command(slider_param: str):
@@ -145,7 +141,7 @@ class UtilityWindow:
 
         slider_frame = tk.Frame(self._window)
 
-        param_list = self._dpqcls.params_to_default_vals().keys()
+        param_list = self._dpqcls.params()
         limit_map = self._dpqcls.params_to_limits()
         labels_map = self._dpqcls.params_to_slider_labels()
         resolution_map = self._dpqcls.params_are_integers()
@@ -172,4 +168,5 @@ class UtilityWindow:
         slider_frame.grid(column=0, row=2)
 
 if __name__ == "__main__":
-    utility_window = UtilityWindow(DPHistogram, "eps")
+    # utility_window = UtilityWindow(DPHistogram, "eps")
+    utility_window = UtilityWindow(DPMean, "delta")

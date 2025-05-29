@@ -1,5 +1,6 @@
 import numpy as np
 
+from gaussian_mechanism import GaussianMechanism
 from laplace_mechanism import LaplaceMechanism
 from sensitivities import L1Sensitivity
 from query import Query, DPQuery
@@ -17,6 +18,9 @@ class Mean(Query, L1Sensitivity):
     def l1_sens(self) -> float:
         return self._l1_sens
 
+    def l2_sens(self) -> float:
+        return self._l1_sens
+
 
 class FiniteAlphabetMean(Mean):
     def __init__(self, alphabet: np.ndarray, dataset_size: int):
@@ -25,43 +29,112 @@ class FiniteAlphabetMean(Mean):
 
 class DPMean(DPQuery):
 
-    # TODO implement these for the mean
-    def privacy_region(self, *args, **kwargs):
-        pass
-
-    @staticmethod
-    def pretty_name() -> str:
-        pass
-
-    @staticmethod
-    def params() -> List[str]:
-        pass
-
-    @staticmethod
-    def params_to_graph_labels() -> Dict[str, str]:
-        pass
-
-    @staticmethod
-    def params_to_kwargs() -> Dict[str, str]:
-        pass
-
-    @staticmethod
-    def params_to_limits() -> Dict[str, Tuple[float, float]]:
-        pass
-
-    @staticmethod
-    def params_are_in_logscale() -> Dict[str, bool]:
-        pass
-
-    def __init__(self, alphabet: np.ndarray, dataset_size: int, eps: float):
-        self._mean = Mean(np.max(alphabet) - np.min(alphabet), dataset_size)
-        self._laplace = LaplaceMechanism(eps, self._mean.l1_sens())
+    def __init__(self, eps: float, delta: float, dataset_diameter: float, dataset_size: int, dimensions: int):
+        self._mean = Mean(dataset_diameter, dataset_size)
+        self._gaussian_mech = GaussianMechanism(eps, delta, self._mean.l2_sens())
         super().__init__(eps, 0)
 
     @staticmethod
     def utility_func(*args, **kwargs):
-        return 2 * (LaplaceMechanism.noise_scale_func(kwargs["mean_eps"], kwargs["mean_l1_sens"]) ** 2)
+        return (2 * kwargs["mean_dimensions"] *
+                (GaussianMechanism.noise_scale_func(kwargs["mean_eps"],kwargs["mean_delta"],
+                 kwargs["mean_dataset_diameter"]/kwargs["mean_dataset_size"])))
 
     def apply(self, x: np.ndarray) -> Any:
-        return self._laplace(np.array(self._mean.apply(x)))
+        return self._gaussian_mech(np.array(self._mean.apply(x)))
+
+    @staticmethod
+    def params_to_slider_labels() -> Dict[str, str]:
+        return {
+            "eps" : "log(epsilon)",
+            "delta" : "delta",
+            "dataset_size" : "Dataset size",
+            "dataset_diameter" : "Data diameter",
+            "dimensions": "Number of dimensions"
+        }
+
+    @staticmethod
+    def params_are_integers() -> Dict[str, bool]:
+        return {
+            "eps" : False,
+            "delta" : False,
+            "dataset_size" : True,
+            "dataset_diameter" : False,
+            "dimensions": True
+        }
+
+    @staticmethod
+    def params_change_privacy() -> Dict[str, bool]:
+        return {
+            "eps": True,
+            "delta": True,
+            "dataset_size": False,
+            "dataset_diameter": False,
+            "dimensions": False
+        }
+
+    @staticmethod
+    def params_to_default_vals() -> Dict[str, float]:
+        return {
+            "eps": 0.3,
+            "delta": 0.1,
+            "dataset_size": 50,
+            "dataset_diameter": 10,
+            "dimensions": 1
+        }
+
+    @staticmethod
+    def utility_label() -> str:
+        return "Mean squared error"
+
+    def privacy_region(self, *args, **kwargs):
+        return self._gaussian_mech.region_exact()
+
+    @staticmethod
+    def pretty_name() -> str:
+        return "mean"
+
+    @staticmethod
+    def params() -> List[str]:
+        return ["eps", "delta", "dataset_diameter", "dataset_size", "dimensions"]
+
+    @staticmethod
+    def params_to_graph_labels() -> Dict[str, str]:
+        return {
+            "eps": "$\\epsilon$",
+            "delta": "$\\delta$",
+            "dataset_size": DPMean.params_to_slider_labels()["dataset_size"],
+            "dataset_diameter": DPMean.params_to_slider_labels()["dataset_diameter"],
+            "dimensions": DPMean.params_to_slider_labels()["dimensions"]
+        }
+
+    @staticmethod
+    def params_to_kwargs() -> Dict[str, str]:
+        return {
+            "eps": "mean_eps",
+            "delta": "mean_delta",
+            "dataset_size": "mean_dataset_size",
+            "dataset_diameter": "mean_dataset_diameter",
+            "dimensions": "mean_dimensions"
+        }
+
+    @staticmethod
+    def params_to_limits() -> Dict[str, Tuple[float, float]]:
+        return {
+            "eps": (-3, 1),
+            "delta": (0.05, 1),
+            "dataset_size": (1, 200),
+            "dataset_diameter": (0.1, 20),
+            "dimensions": (1, 20)
+        }
+
+    @staticmethod
+    def params_are_in_logscale() -> Dict[str, bool]:
+        return {
+            "eps": True,
+            "delta": False,
+            "dataset_size": False,
+            "dataset_diameter": False,
+            "dimensions": False
+        }
 
