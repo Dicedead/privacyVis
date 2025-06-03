@@ -1,7 +1,5 @@
-from typing import Any
-
 from additive_mechanism import AdditiveMechanism
-from differential_privacy import *
+from regions import *
 
 
 class LaplaceMechanism(AdditiveMechanism):

@@ -9,7 +9,7 @@ from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
 from histogram import DPHistogram
 from mean import DPMean
 from query import DPQuery
-from regions import MultiRegionFigure
+from region_figures import MultiRegionFigure
 
 _RESOLUTION_NON_INTEGER = 0.05
 _RESOLUTION_INTEGER = 1

@@ -4,7 +4,7 @@ from typing import Any
 import numpy as np
 
 from definitions import TradeOffFunction, Region
-from differential_privacy import region_from_f_dp, region_from_dp_tv_params
+from model.diff_privacy.regions import region_from_f_dp, region_from_dp_tv_params
 
 
 class Mechanism(ABC):
