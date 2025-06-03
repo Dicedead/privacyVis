@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from typing import Type
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
@@ -14,9 +15,12 @@ _REGION_VALUES = [DPRegion]
 
 _ADDER_LABELS_TO_CLS_MAP = {}
 for cls in _REGION_VALUES:
-    _ADDER_LABELS_TO_CLS_MAP[cls.__name__] = cls
+    _ADDER_LABELS_TO_CLS_MAP[cls.adder_label()] = cls
 
 _REGION_VALUES = [cls.adder_label() for cls in _REGION_VALUES]
+
+_INITIAL_SELECTOR_VALUES = ["No region selected"]
+_PRIVACY_PLOT_TITLE = "Differential privacy"
 
 class PrivacyWindow:
     def __init__(self, window_size=_WINDOW_SIZE):
@@ -37,6 +41,8 @@ class PrivacyWindow:
 
         self._privacy_fig = None
         self._privacy_canvas = None
+        self._param_vals = None
+        self._reg_cls: Type[AdaptedRegionComputer] = None
         self._selector_val = None
         self._selector_combob = None
         self._adder_val = None
@@ -49,13 +55,32 @@ class PrivacyWindow:
 
     def plot_privacy(self):
         self._privacy_fig = MultiRegionFigure(figsize=_FIGSIZE, dpi=_DPI)
-        self._privacy_fig.finish_figure("Differential privacy")
         self._privacy_canvas = FigureCanvasTkAgg(self._privacy_fig.get_figure(), master=self._window)
 
         privacy_toolbar_frame = tk.Frame(self._window)
         privacy_toolbar = NavigationToolbar2Tk(self._privacy_canvas, privacy_toolbar_frame)
         privacy_toolbar_frame.grid(column=0, row=3)
         self._privacy_canvas.get_tk_widget().grid(column=0, row=0, rowspan=2) # TODO define rowspan
+        
+    def replot_privacy(self):
+        self._privacy_fig.clear_figure()
+        
+        construct_args = {param: self._param_vals[param] for param in self._reg_cls.params()}
+        for param in self._reg_cls.params():
+            if self._reg_cls.params_to_log()[param]:
+                construct_args[param] = 10 ** self._param_vals[param]
+
+
+        self._privacy_fig.add_region(
+            self._reg_cls.region_computation(**construct_args),
+            f"{self._reg_cls.adder_label()} ({", ".join(
+                [f'{self._reg_cls.params_to_graph_labels()[param]}: {construct_args[param]:.2f}'
+                           for param in self._reg_cls.params()])})"
+        )
+        self._privacy_fig.finish_figure(_PRIVACY_PLOT_TITLE)
+
+        self._privacy_canvas.draw()
+        self._privacy_canvas.flush_events()
 
     def build_selection_dropdown(self):
 
@@ -73,7 +98,7 @@ class PrivacyWindow:
         self._selector_combob.pack()
 
         self._selector_combob['state'] = 'readonly'
-        self._selector_combob['values'] = ["1"]
+        self._selector_combob['values'] = _INITIAL_SELECTOR_VALUES
 
         self._selector_combob.bind('<<ComboboxSelected>>', onclick)
 
@@ -82,9 +107,15 @@ class PrivacyWindow:
     def build_addition_dropdown(self):
         def onclick(event):
             curr_val = self._adder_val.get()
+            
             ls = list(self._selector_combob['values'])
             ls.append(curr_val)
             self._selector_combob['values'] = ls
+
+            self._reg_cls = _ADDER_LABELS_TO_CLS_MAP[curr_val]
+            self._param_vals = self._reg_cls.params_to_default_vals()
+
+            self.replot_privacy()
             # TODO add plotting + slider selection
 
         adder_frame = tk.Frame(self._window)

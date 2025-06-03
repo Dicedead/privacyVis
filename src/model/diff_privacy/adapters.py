@@ -34,6 +34,11 @@ class AdaptedRegionComputer(ABC):
 
     @staticmethod
     @abstractmethod
+    def params_to_slider_labels() -> Dict[str, str]:
+        pass
+
+    @staticmethod
+    @abstractmethod
     def params_to_graph_labels() -> Dict[str, str]:
         pass
 
@@ -81,10 +86,17 @@ class DPRegion(AdaptedRegionComputer):
         }
 
     @staticmethod
-    def params_to_graph_labels() -> Dict[str, str]:
+    def params_to_slider_labels() -> Dict[str, str]:
         return {
             'eps': 'log(epsilon)',
             'delta': 'delta'
+        }
+
+    @staticmethod
+    def params_to_graph_labels() -> Dict[str, str]:
+        return {
+            'eps': '$\\epsilon$',
+            'delta': '$\\delta$'
         }
 
     @staticmethod
@@ -97,7 +109,7 @@ class DPRegion(AdaptedRegionComputer):
     @staticmethod
     def params_to_limits() -> Dict[str, Tuple[float, float]]:
         return {
-            'eps': (0.0, 1),
+            'eps': (-3, 1),
             'delta': (0.0, 1.0)
         }
 

@@ -15,6 +15,7 @@ _RESOLUTION_NON_INTEGER = 0.05
 _RESOLUTION_INTEGER = 1
 _SLIDER_LENGTH = 300
 _WINDOW_SIZE = "1300x900"
+_PRIVACY_PLOT_TITLE = "Differential privacy"
 
 class UtilityWindow:
     def __init__(self,
@@ -98,7 +99,6 @@ class UtilityWindow:
 
     def plot_privacy(self):
         self._privacy_fig = MultiRegionFigure()
-        self._privacy_fig.finish_figure("Differential privacy")
         self._privacy_canvas = FigureCanvasTkAgg(self._privacy_fig.get_figure(), master=self._window)
 
         self.replot_privacy()
@@ -120,7 +120,7 @@ class UtilityWindow:
             self._dpqcls(**construct_args).privacy_region(),
             f"({", ".join([f'{self._dpqcls.params_to_graph_labels()[param]}: {construct_args[param]:.2f}'
                            for param in self._dpqcls.params() if self._dpqcls.params_change_privacy()[param]])})")
-        self._privacy_fig.finish_figure("Differential privacy")
+        self._privacy_fig.finish_figure(_PRIVACY_PLOT_TITLE)
 
         self._privacy_canvas.draw()
         self._privacy_canvas.flush_events()
