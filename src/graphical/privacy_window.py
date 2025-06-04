@@ -44,11 +44,12 @@ class PrivacyWindow:
 
         self._privacy_fig = None
         self._privacy_canvas = None
-        self._param_vals = None
-        self._reg_cls: Type[AdaptedRegionComputer] = None
-        self._selector_val = None
+        self._curr_param_vals = None
+        self._curr_reg_cls: Type[AdaptedRegionComputer] = None
+        self._reg_ids_to_param_vals: Dict[int, Dict[str, float]] = {}
+        # TODO update this map
+
         self._selector_combob = None
-        self._adder_val = None
         self._slider_frame: tk.Frame = None
         self._curr_reg_id = -1
 
@@ -75,19 +76,17 @@ class PrivacyWindow:
         self._privacy_canvas.flush_events()
         
     def add_region(self):
-        #self._privacy_fig.clear_figure()
-        
-        construct_args = {param: self._param_vals[param] for param in self._reg_cls.params()}
-        for param in self._reg_cls.params():
-            if self._reg_cls.params_are_logscale()[param]:
-                construct_args[param] = 10 ** self._param_vals[param]
+        construct_args = {param: self._curr_param_vals[param] for param in self._curr_reg_cls.params()}
+        for param in self._curr_reg_cls.params():
+            if self._curr_reg_cls.params_are_logscale()[param]:
+                construct_args[param] = 10 ** self._curr_param_vals[param]
 
 
         self._curr_reg_id = self._privacy_fig.add_region(
-            self._reg_cls.region_computation(**construct_args),
-            f"{self._reg_cls.adder_label()} ({", ".join(
-                [f'{self._reg_cls.params_to_graph_labels()[param]}: {construct_args[param]:.2f}'
-                           for param in self._reg_cls.params()])})"
+            self._curr_reg_cls.region_computation(**construct_args),
+            f"{self._curr_reg_cls.adder_label()} ({", ".join(
+                [f'{self._curr_reg_cls.params_to_graph_labels()[param]}: {construct_args[param]:.2f}'
+                 for param in self._curr_reg_cls.params()])})"
         )
 
         self.replot_privacy()
@@ -100,15 +99,21 @@ class PrivacyWindow:
 
         def onclick(event):
             # TODO update this: put region in front
-            curr_val = self._selector_val.get()
+            curr_val = selector_val.get()
 
+            if curr_val in _INITIAL_SELECTOR_VALUES:
+                self.destroy_slider_frame()
+                return
+
+            self._curr_reg_cls = _ADDER_LABELS_TO_CLS_MAP[curr_val]
+            self._curr_param_vals = self._curr_reg_cls.params_to_default_vals()
 
         selector_frame = tk.Frame(self._window)
         selector_label = tk.Label(selector_frame, text="Select a region:")
         selector_label.pack()
 
-        self._selector_val = tk.StringVar()
-        self._selector_combob = ttk.Combobox(selector_frame, textvariable=self._selector_val)
+        selector_val = tk.StringVar()
+        self._selector_combob = ttk.Combobox(selector_frame, textvariable=selector_val)
         self._selector_combob.pack()
 
         self._selector_combob['state'] = 'readonly'
@@ -120,14 +125,14 @@ class PrivacyWindow:
 
     def build_addition_dropdown(self):
         def onclick(event):
-            curr_val = self._adder_val.get()
+            curr_val = adder_val.get()
             
             ls = list(self._selector_combob['values'])
             ls.append(curr_val)
             self._selector_combob['values'] = ls
 
-            self._reg_cls = _ADDER_LABELS_TO_CLS_MAP[curr_val]
-            self._param_vals = self._reg_cls.params_to_default_vals()
+            self._curr_reg_cls = _ADDER_LABELS_TO_CLS_MAP[curr_val]
+            self._curr_param_vals = self._curr_reg_cls.params_to_default_vals()
 
             self.add_region()
             self.rebuild_slider_frame()
@@ -136,8 +141,8 @@ class PrivacyWindow:
         adder_label = tk.Label(adder_frame, text="Add a region:")
         adder_label.pack()
 
-        self._adder_val = tk.StringVar()
-        adder_combob = ttk.Combobox(adder_frame, textvariable=self._adder_val)
+        adder_val = tk.StringVar()
+        adder_combob = ttk.Combobox(adder_frame, textvariable=adder_val)
         adder_combob.pack()
 
         adder_combob['state'] = 'readonly'
@@ -152,27 +157,30 @@ class PrivacyWindow:
         self._slider_frame.columnconfigure(1, weight=10)
         self._slider_frame.grid(column=1, row=1)
 
-    def rebuild_slider_frame(self):
+    def destroy_slider_frame(self):
         self._slider_frame.destroy()
+
+    def rebuild_slider_frame(self):
+        self.destroy_slider_frame()
         self.build_slider_frame()
         # TODO are these 2 lines necess?
 
         def slider_command(slider_param: str):
             def command(x):
-                self._param_vals[slider_param] = slider_vars[slider_param].get()
+                self._curr_param_vals[slider_param] = slider_vars[slider_param].get()
                 self.schedule_removal(self._curr_reg_id)
                 self.add_region()
             return command
 
-        param_list = self._reg_cls.params()
-        limit_map = self._reg_cls.params_to_limits()
-        labels_map = self._reg_cls.params_to_slider_labels()
-        resolution_map = self._reg_cls.params_are_integers()
+        param_list = self._curr_reg_cls.params()
+        limit_map = self._curr_reg_cls.params_to_limits()
+        labels_map = self._curr_reg_cls.params_to_slider_labels()
+        resolution_map = self._curr_reg_cls.params_are_integers()
 
         slider_vars = {}
         for idx, param in enumerate(param_list):
-            slider_vars[param] = tk.IntVar(value=self._param_vals[param]) \
-                if resolution_map[param] else tk.DoubleVar(value=self._param_vals[param])
+            slider_vars[param] = tk.IntVar(value=self._curr_param_vals[param]) \
+                if resolution_map[param] else tk.DoubleVar(value=self._curr_param_vals[param])
 
             self._slider_frame.rowconfigure(idx, weight=1)
             a, b = limit_map[param]
