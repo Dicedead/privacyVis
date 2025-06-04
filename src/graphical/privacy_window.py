@@ -50,7 +50,7 @@ class PrivacyWindow:
         self._selector_combob = None
         self._adder_val = None
         self._slider_frame: tk.Frame = None
-        self._region_counter = 1
+        self._curr_reg_id = -1
 
         self.plot_privacy()
         self.build_selection_dropdown()
@@ -67,8 +67,14 @@ class PrivacyWindow:
         privacy_toolbar = NavigationToolbar2Tk(self._privacy_canvas, privacy_toolbar_frame)
         privacy_toolbar_frame.grid(column=0, row=3)
         self._privacy_canvas.get_tk_widget().grid(column=0, row=0, rowspan=2) # TODO define rowspan
-        
+
     def replot_privacy(self):
+        self._privacy_fig.clear_figure()
+        self._privacy_fig.finish_figure(_PRIVACY_PLOT_TITLE)
+        self._privacy_canvas.draw()
+        self._privacy_canvas.flush_events()
+        
+    def add_region(self):
         #self._privacy_fig.clear_figure()
         
         construct_args = {param: self._param_vals[param] for param in self._reg_cls.params()}
@@ -77,16 +83,18 @@ class PrivacyWindow:
                 construct_args[param] = 10 ** self._param_vals[param]
 
 
-        self._privacy_fig.add_region(
+        self._curr_reg_id = self._privacy_fig.add_region(
             self._reg_cls.region_computation(**construct_args),
             f"{self._reg_cls.adder_label()} ({", ".join(
                 [f'{self._reg_cls.params_to_graph_labels()[param]}: {construct_args[param]:.2f}'
                            for param in self._reg_cls.params()])})"
         )
-        self._privacy_fig.finish_figure(_PRIVACY_PLOT_TITLE)
 
-        self._privacy_canvas.draw()
-        self._privacy_canvas.flush_events()
+        self.replot_privacy()
+
+    def schedule_removal(self, region_id: int):
+        self._privacy_fig.remove_region(region_id)
+        # self.replot_privacy()
 
     def build_selection_dropdown(self):
 
@@ -121,7 +129,7 @@ class PrivacyWindow:
             self._reg_cls = _ADDER_LABELS_TO_CLS_MAP[curr_val]
             self._param_vals = self._reg_cls.params_to_default_vals()
 
-            self.replot_privacy()
+            self.add_region()
             self.rebuild_slider_frame()
 
         adder_frame = tk.Frame(self._window)
@@ -147,11 +155,13 @@ class PrivacyWindow:
     def rebuild_slider_frame(self):
         self._slider_frame.destroy()
         self.build_slider_frame()
+        # TODO are these 2 lines necess?
 
         def slider_command(slider_param: str):
             def command(x):
                 self._param_vals[slider_param] = slider_vars[slider_param].get()
-                self.replot_privacy()
+                self.schedule_removal(self._curr_reg_id)
+                self.add_region()
             return command
 
         param_list = self._reg_cls.params()

@@ -11,6 +11,8 @@ from functools import reduce
 
 from palettes import colourblind_palette
 
+_TO_REMOVE = None
+
 
 def draw_single_region_from_constraints(
         constraints: Sequence[Constraint],
@@ -73,30 +75,38 @@ class MultiRegionFigure:
         self._x, self._y = np.meshgrid(d, d)
         self._start = start_grid
         self._stop = stop_grid
-        self._labels = []
+        self._region_id = -1
 
         if palette is None:
             palette = copy.deepcopy(colourblind_palette())
 
         self._palette = np.array(palette)
 
-    def add_region(self, constraints: Sequence[Constraint], label: str):
+    def add_region(self, constraints: Sequence[Constraint], label: str) -> int:
         double = (constraints, label)
         self._labelled_regions.append(double)
+        self._region_id += 1
+        return self._region_id
+
+    def remove_region(self, region_id: int):
+        self._labelled_regions[region_id] = _TO_REMOVE
 
     def finish_figure(self, title=""):
         self.draw_figure(title=title)
 
     def draw_figure(self, title=""):
-        for idx, labelled_computed_region in enumerate(self._compute_and_sort_regions(self._labelled_regions)):
+        shown_regions = [reg for reg in self._labelled_regions if reg is not _TO_REMOVE]
+        labels = []
+
+        for idx, labelled_computed_region in enumerate(self._compute_and_sort_regions(shown_regions)):
             k = idx + 1
             computed_region, label = labelled_computed_region
             self._plot.imshow(self._palette[k * computed_region],
                        extent=(self._start, self._stop, self._start, self._stop),
                        origin="lower")
-            self._labels.append(label)
-        patches = [mpatches.Patch(color=self._palette[i+1]/255., label=lab)
-                   for i, lab in enumerate(self._labels)]
+            labels.append(label)
+        patches = [mpatches.Patch(color=self._palette[(i+1) % len(self._palette)]/255., label=lab)
+                   for i, lab in enumerate(labels)]
         self._plot.legend(handles=patches)
         self._plot.set(xlim=(self._start, self._stop), ylim=(self._start, self._stop))
         self._plot.set_title(title)
@@ -109,11 +119,11 @@ class MultiRegionFigure:
         return self._fig
 
     def clear_figure(self):
-        self._labels.clear()
         self._plot.clear()
 
     def reset_figure(self):
         self._labelled_regions.clear()
+        self._region_id = -1
         self.clear_figure()
 
     def save_figure(self, path):
