@@ -94,11 +94,11 @@ class MultiRegionFigure:
     def finish_figure(self, title=""):
         self.draw_figure(title=title)
 
-    def draw_figure(self, title=""):
+    def draw_figure(self, title="", prioritize_region=-1):
         shown_regions = [reg for reg in self._labelled_regions if reg is not _TO_REMOVE]
         labels = []
 
-        for idx, labelled_computed_region in enumerate(self._compute_and_sort_regions(shown_regions)):
+        for idx, labelled_computed_region in enumerate(self._compute_and_sort_regions(shown_regions, prioritize_region)):
             k = idx + 1
             computed_region, label = labelled_computed_region
             self._plot.imshow(self._palette[k * computed_region],
@@ -133,29 +133,42 @@ class MultiRegionFigure:
         applied_constraints = [constraint(self._x, self._y) for constraint in region]
         return reduce(lambda c1, c2: c1 & c2, applied_constraints).astype(int)
 
-    def _compute_and_sort_regions(self, labelled_regions: List[Tuple[Sequence[Constraint], str]])\
+    def _compute_and_sort_regions(self, labelled_regions: List[Tuple[Sequence[Constraint], str]], prioritize_region) \
             -> List[Tuple[np.ndarray, str]]:
         computed_labelled_regions = [
-            (self._compute_region(reg), label) for (reg, label) in labelled_regions
+            (self._compute_region(reg), label, idx) for idx, (reg, label) in enumerate(labelled_regions)
         ]
 
-        computed_labelled_regions.sort(key=functools.cmp_to_key(MultiRegionFigure._compare_regions), reverse=True)
+        computed_labelled_regions.sort(key=functools.cmp_to_key(MultiRegionFigure._region_comparator(prioritize_region)),
+                                       reverse=True)
 
-        return computed_labelled_regions
+        return [(reg, label) for (reg, label, idx) in computed_labelled_regions]
 
     @staticmethod
-    def _compare_regions(region1: Tuple[np.ndarray, str], region2: Tuple[np.ndarray, str]) -> int:
-        diff = region1[0] - region2[0]
-        one_contains_two = np.all(diff >= 0)
-        two_contains_one = np.all(-diff >= 0)
+    def _region_comparator(prioritize_region: int):
 
-        if one_contains_two and not two_contains_one:
-            return 1
+        def inner(region1: Tuple[np.ndarray, str, int], region2: Tuple[np.ndarray, str, int]):
+            if region1[2] == prioritize_region:
+                return 1
+            elif region2[2] == prioritize_region:
+                return -1
 
-        if two_contains_one and not one_contains_two:
-            return -1
+            diff = region1[0] - region2[0]
+            one_contains_two = np.all(diff >= 0)
+            two_contains_one = np.all(-diff >= 0)
+            diff = region1[0] - region2[0]
+            one_contains_two = np.all(diff >= 0)
+            two_contains_one = np.all(-diff >= 0)
 
-        if one_contains_two and two_contains_one:
-            return 0
+            if one_contains_two and not two_contains_one:
+                return 1
 
-        return diff.sum()
+            if two_contains_one and not one_contains_two:
+                return -1
+
+            if one_contains_two and two_contains_one:
+                return 0
+
+            return diff.sum()
+
+        return inner

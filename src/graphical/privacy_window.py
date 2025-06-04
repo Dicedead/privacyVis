@@ -1,4 +1,5 @@
 import tkinter as tk
+from copy import copy
 from tkinter import ttk
 from typing import Type
 
@@ -42,16 +43,23 @@ class PrivacyWindow:
 
         self._window.configure(background="white")
 
+        self._selector_val = tk.StringVar()
+
         self._privacy_fig = None
         self._privacy_canvas = None
         self._curr_param_vals = None
+        self._curr_selector_label = None
         self._curr_reg_cls: Type[AdaptedRegionComputer] = None
-        self._reg_ids_to_param_vals: Dict[int, Dict[str, float]] = {}
+        self._selector_label_to_param_vals: Dict[str, Dict[str, float]] = {}
+        self._selector_label_to_reg_id: Dict[str, int] = {}
+        self._selector_label_to_cls: Dict[str, Type[AdaptedRegionComputer]] = {}
+
         # TODO update this map
 
         self._selector_combob = None
         self._slider_frame: tk.Frame = None
         self._curr_reg_id = -1
+        self._reg_selector_num = 1
 
         self.plot_privacy()
         self.build_selection_dropdown()
@@ -76,11 +84,10 @@ class PrivacyWindow:
         self._privacy_canvas.flush_events()
         
     def add_region(self):
-        construct_args = {param: self._curr_param_vals[param] for param in self._curr_reg_cls.params()}
+        construct_args = copy(self._curr_param_vals)
         for param in self._curr_reg_cls.params():
             if self._curr_reg_cls.params_are_logscale()[param]:
                 construct_args[param] = 10 ** self._curr_param_vals[param]
-
 
         self._curr_reg_id = self._privacy_fig.add_region(
             self._curr_reg_cls.region_computation(**construct_args),
@@ -98,22 +105,24 @@ class PrivacyWindow:
     def build_selection_dropdown(self):
 
         def onclick(event):
-            # TODO update this: put region in front
-            curr_val = selector_val.get()
+            # TODO update this: put region in front + rebuild sliders
+            curr_val = self._selector_val.get()
 
             if curr_val in _INITIAL_SELECTOR_VALUES:
                 self.destroy_slider_frame()
                 return
 
-            self._curr_reg_cls = _ADDER_LABELS_TO_CLS_MAP[curr_val]
-            self._curr_param_vals = self._curr_reg_cls.params_to_default_vals()
+            self._curr_reg_id = self._selector_label_to_reg_id[curr_val]
+            self._curr_reg_cls = self._selector_label_to_cls[curr_val]
+            self._curr_param_vals = self._selector_label_to_param_vals[curr_val]
+
+            self.rebuild_slider_frame()
 
         selector_frame = tk.Frame(self._window)
         selector_label = tk.Label(selector_frame, text="Select a region:")
         selector_label.pack()
 
-        selector_val = tk.StringVar()
-        self._selector_combob = ttk.Combobox(selector_frame, textvariable=selector_val)
+        self._selector_combob = ttk.Combobox(selector_frame, textvariable=self._selector_val)
         self._selector_combob.pack()
 
         self._selector_combob['state'] = 'readonly'
@@ -126,9 +135,10 @@ class PrivacyWindow:
     def build_addition_dropdown(self):
         def onclick(event):
             curr_val = adder_val.get()
+            selector_label = curr_val + f" (Reg. #{self._reg_selector_num})"
             
             ls = list(self._selector_combob['values'])
-            ls.append(curr_val)
+            ls.append(selector_label)
             self._selector_combob['values'] = ls
 
             self._curr_reg_cls = _ADDER_LABELS_TO_CLS_MAP[curr_val]
@@ -136,6 +146,12 @@ class PrivacyWindow:
 
             self.add_region()
             self.rebuild_slider_frame()
+
+            self._curr_selector_label = selector_label
+            self.update_curr_reg()
+            self._reg_selector_num += 1
+
+            self._selector_val.set(selector_label)
 
         adder_frame = tk.Frame(self._window)
         adder_label = tk.Label(adder_frame, text="Add a region:")
@@ -170,6 +186,7 @@ class PrivacyWindow:
                 self._curr_param_vals[slider_param] = slider_vars[slider_param].get()
                 self.schedule_removal(self._curr_reg_id)
                 self.add_region()
+                self.update_curr_reg()
             return command
 
         param_list = self._curr_reg_cls.params()
@@ -197,6 +214,11 @@ class PrivacyWindow:
             scale.grid(column=1, row=idx)
             label = tk.Label(self._slider_frame, text=labels_map[param])
             label.grid(column=0, row=idx)
+
+    def update_curr_reg(self):
+        self._selector_label_to_reg_id[self._curr_selector_label] = self._curr_reg_id
+        self._selector_label_to_cls[self._curr_selector_label] = self._curr_reg_cls
+        self._selector_label_to_param_vals[self._curr_selector_label] = copy(self._curr_param_vals)
 
 
 
