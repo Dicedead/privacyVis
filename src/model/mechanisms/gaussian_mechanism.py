@@ -1,5 +1,5 @@
 from additive_mechanism import AdditiveMechanism
-from differential_privacy import *
+from regions import *
 
 
 class GaussianMechanism(AdditiveMechanism):

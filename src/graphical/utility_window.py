@@ -109,7 +109,7 @@ class UtilityWindow:
         self._privacy_canvas.get_tk_widget().grid(column=1, row=0, rowspan=3)
 
     def replot_privacy(self):
-        self._privacy_fig.clear_figure()
+        self._privacy_fig.reset_figure()
         construct_args = {param: self._param_vals[param].get() for param in self._dpqcls.params()}
         for param in self._dpqcls.params():
             if self._dpqcls.params_are_in_logscale()[param]:

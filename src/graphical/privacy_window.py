@@ -10,6 +10,9 @@ from adapters import *
 _WINDOW_SIZE = "1300x900"
 _FIGSIZE = (7, 7)
 _DPI = 100
+_RESOLUTION_NON_INTEGER = 0.05
+_RESOLUTION_INTEGER = 1
+_SLIDER_LENGTH = 200
 
 _REGION_VALUES = [DPRegion]
 
@@ -46,10 +49,13 @@ class PrivacyWindow:
         self._selector_val = None
         self._selector_combob = None
         self._adder_val = None
+        self._slider_frame: tk.Frame = None
+        self._region_counter = 1
 
         self.plot_privacy()
         self.build_selection_dropdown()
         self.build_addition_dropdown()
+        self.build_slider_frame()
 
         self._window.mainloop()
 
@@ -63,11 +69,11 @@ class PrivacyWindow:
         self._privacy_canvas.get_tk_widget().grid(column=0, row=0, rowspan=2) # TODO define rowspan
         
     def replot_privacy(self):
-        self._privacy_fig.clear_figure()
+        #self._privacy_fig.clear_figure()
         
         construct_args = {param: self._param_vals[param] for param in self._reg_cls.params()}
         for param in self._reg_cls.params():
-            if self._reg_cls.params_to_log()[param]:
+            if self._reg_cls.params_are_logscale()[param]:
                 construct_args[param] = 10 ** self._param_vals[param]
 
 
@@ -87,7 +93,7 @@ class PrivacyWindow:
         def onclick(event):
             # TODO update this: put region in front
             curr_val = self._selector_val.get()
-            self._selector_combob['values'] = ["1", "2"]
+
 
         selector_frame = tk.Frame(self._window)
         selector_label = tk.Label(selector_frame, text="Select a region:")
@@ -116,7 +122,7 @@ class PrivacyWindow:
             self._param_vals = self._reg_cls.params_to_default_vals()
 
             self.replot_privacy()
-            # TODO add plotting + slider selection
+            self.rebuild_slider_frame()
 
         adder_frame = tk.Frame(self._window)
         adder_label = tk.Label(adder_frame, text="Add a region:")
@@ -131,6 +137,49 @@ class PrivacyWindow:
 
         adder_combob.bind('<<ComboboxSelected>>', onclick)
         adder_frame.grid(column=1, row=2)
+
+    def build_slider_frame(self):
+        self._slider_frame = tk.Frame(self._window)
+        self._slider_frame.columnconfigure(0, weight=1)
+        self._slider_frame.columnconfigure(1, weight=10)
+        self._slider_frame.grid(column=1, row=1)
+
+    def rebuild_slider_frame(self):
+        self._slider_frame.destroy()
+        self.build_slider_frame()
+
+        def slider_command(slider_param: str):
+            def command(x):
+                self._param_vals[slider_param] = slider_vars[slider_param].get()
+                self.replot_privacy()
+            return command
+
+        param_list = self._reg_cls.params()
+        limit_map = self._reg_cls.params_to_limits()
+        labels_map = self._reg_cls.params_to_slider_labels()
+        resolution_map = self._reg_cls.params_are_integers()
+
+        slider_vars = {}
+        for idx, param in enumerate(param_list):
+            slider_vars[param] = tk.IntVar(value=self._param_vals[param]) \
+                if resolution_map[param] else tk.DoubleVar(value=self._param_vals[param])
+
+            self._slider_frame.rowconfigure(idx, weight=1)
+            a, b = limit_map[param]
+            resolution = _RESOLUTION_INTEGER if resolution_map[param] else _RESOLUTION_NON_INTEGER
+            scale = tk.Scale(self._slider_frame,
+                             from_=a, to=b,
+                             variable=slider_vars[param],
+                             command=slider_command(param),
+                             resolution=resolution,
+                             background="white",
+                             orient=tk.HORIZONTAL,
+                             length=_SLIDER_LENGTH)
+
+            scale.grid(column=1, row=idx)
+            label = tk.Label(self._slider_frame, text=labels_map[param])
+            label.grid(column=0, row=idx)
+
 
 
 if __name__ == "__main__":

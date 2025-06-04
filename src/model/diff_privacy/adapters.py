@@ -29,7 +29,12 @@ class AdaptedRegionComputer(ABC):
 
     @staticmethod
     @abstractmethod
-    def params_to_log() -> Dict[str, bool]:
+    def params_are_integers() -> Dict[str, bool]:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def params_are_logscale() -> Dict[str, bool]:
         pass
 
     @staticmethod
@@ -79,9 +84,16 @@ class DPRegion(AdaptedRegionComputer):
         }
 
     @staticmethod
-    def params_to_log():
+    def params_are_logscale():
         return {
             'eps': True,
+            'delta': False
+        }
+
+    @staticmethod
+    def params_are_integers():
+        return {
+            'eps': False,
             'delta': False
         }
 
