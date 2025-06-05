@@ -95,7 +95,7 @@ class MultiRegionFigure:
         self.draw_figure(title=title)
 
     def draw_figure(self, title="", prioritize_region=-1):
-        shown_regions = [reg for reg in self._labelled_regions if reg is not _TO_REMOVE]
+        shown_regions = [(reg[0], reg[1], idx) for idx, reg in enumerate(self._labelled_regions) if reg is not _TO_REMOVE]
         labels = []
 
         for idx, labelled_computed_region in enumerate(self._compute_and_sort_regions(shown_regions, prioritize_region)):
@@ -133,10 +133,10 @@ class MultiRegionFigure:
         applied_constraints = [constraint(self._x, self._y) for constraint in region]
         return reduce(lambda c1, c2: c1 & c2, applied_constraints).astype(int)
 
-    def _compute_and_sort_regions(self, labelled_regions: List[Tuple[Sequence[Constraint], str]], prioritize_region) \
+    def _compute_and_sort_regions(self, labelled_regions: List[Tuple[Sequence[Constraint], str, int]], prioritize_region) \
             -> List[Tuple[np.ndarray, str]]:
         computed_labelled_regions = [
-            (self._compute_region(reg), label, idx) for idx, (reg, label) in enumerate(labelled_regions)
+            (self._compute_region(reg), label, idx) for (reg, label, idx) in labelled_regions
         ]
 
         computed_labelled_regions.sort(key=functools.cmp_to_key(MultiRegionFigure._region_comparator(prioritize_region)),
@@ -148,10 +148,13 @@ class MultiRegionFigure:
     def _region_comparator(prioritize_region: int):
 
         def inner(region1: Tuple[np.ndarray, str, int], region2: Tuple[np.ndarray, str, int]):
+            print(region1[2], region2[2])
+            print(prioritize_region)
+            # TODO maybe by graph label?
             if region1[2] == prioritize_region:
-                return 1
-            elif region2[2] == prioritize_region:
                 return -1
+            elif region2[2] == prioritize_region:
+                return 1
 
             diff = region1[0] - region2[0]
             one_contains_two = np.all(diff >= 0)

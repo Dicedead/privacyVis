@@ -32,7 +32,6 @@ class PrivacyWindow:
         self._window.title(f"Privacy regions")
         self._window.geometry(window_size)
 
-        # TODO define grid
         self._window.rowconfigure(0, weight=1)
         self._window.rowconfigure(1, weight=5)
         self._window.rowconfigure(2, weight=1)
@@ -53,13 +52,13 @@ class PrivacyWindow:
         self._selector_label_to_param_vals: Dict[str, Dict[str, float]] = {}
         self._selector_label_to_reg_id: Dict[str, int] = {}
         self._selector_label_to_cls: Dict[str, Type[AdaptedRegionComputer]] = {}
-
-        # TODO update this map
+        self._selector_label_to_reg_num: Dict[str, int] = {}
 
         self._selector_combob = None
         self._slider_frame: tk.Frame = None
         self._curr_reg_id = -1
-        self._reg_selector_num = 1
+        self._region_counter = 0
+        self._curr_reg_num = 0
 
         self.plot_privacy()
         self.build_selection_dropdown()
@@ -75,11 +74,14 @@ class PrivacyWindow:
         privacy_toolbar_frame = tk.Frame(self._window)
         privacy_toolbar = NavigationToolbar2Tk(self._privacy_canvas, privacy_toolbar_frame)
         privacy_toolbar_frame.grid(column=0, row=3)
-        self._privacy_canvas.get_tk_widget().grid(column=0, row=0, rowspan=2) # TODO define rowspan
+        self._privacy_canvas.get_tk_widget().grid(column=0, row=0, rowspan=2)
 
     def replot_privacy(self):
+
+        prioritized_reg = -1 if self._curr_selector_label in _INITIAL_SELECTOR_VALUES else self._curr_reg_id
+
         self._privacy_fig.clear_figure()
-        self._privacy_fig.finish_figure(_PRIVACY_PLOT_TITLE)
+        self._privacy_fig.draw_figure(_PRIVACY_PLOT_TITLE, prioritize_region=prioritized_reg)
         self._privacy_canvas.draw()
         self._privacy_canvas.flush_events()
         
@@ -93,7 +95,7 @@ class PrivacyWindow:
             self._curr_reg_cls.region_computation(**construct_args),
             f"{self._curr_reg_cls.adder_label()} ({", ".join(
                 [f'{self._curr_reg_cls.params_to_graph_labels()[param]}: {construct_args[param]:.2f}'
-                 for param in self._curr_reg_cls.params()])})"
+                 for param in self._curr_reg_cls.params()])}) [#{self._curr_reg_num}]"
         )
 
         self.replot_privacy()
@@ -105,18 +107,25 @@ class PrivacyWindow:
     def build_selection_dropdown(self):
 
         def onclick(event):
-            # TODO update this: put region in front + rebuild sliders
             curr_val = self._selector_val.get()
+            self._curr_selector_label = curr_val
 
             if curr_val in _INITIAL_SELECTOR_VALUES:
                 self.destroy_slider_frame()
+                self._curr_reg_id = None
+                self._curr_reg_cls = None
+                self._curr_param_vals = None
+                self._curr_reg_num = None
+                self.replot_privacy()
                 return
 
             self._curr_reg_id = self._selector_label_to_reg_id[curr_val]
             self._curr_reg_cls = self._selector_label_to_cls[curr_val]
             self._curr_param_vals = self._selector_label_to_param_vals[curr_val]
+            self._curr_reg_num = self._selector_label_to_reg_num[curr_val]
 
             self.rebuild_slider_frame()
+            self.replot_privacy()
 
         selector_frame = tk.Frame(self._window)
         selector_label = tk.Label(selector_frame, text="Select a region:")
@@ -135,7 +144,9 @@ class PrivacyWindow:
     def build_addition_dropdown(self):
         def onclick(event):
             curr_val = adder_val.get()
-            selector_label = curr_val + f" (Reg. #{self._reg_selector_num})"
+            self._region_counter += 1
+            self._curr_reg_num = self._region_counter
+            selector_label = curr_val + f" [#{self._region_counter}]"
             
             ls = list(self._selector_combob['values'])
             ls.append(selector_label)
@@ -149,7 +160,6 @@ class PrivacyWindow:
 
             self._curr_selector_label = selector_label
             self.update_curr_reg()
-            self._reg_selector_num += 1
 
             self._selector_val.set(selector_label)
 
@@ -179,7 +189,6 @@ class PrivacyWindow:
     def rebuild_slider_frame(self):
         self.destroy_slider_frame()
         self.build_slider_frame()
-        # TODO are these 2 lines necess?
 
         def slider_command(slider_param: str):
             def command(x):
@@ -219,6 +228,7 @@ class PrivacyWindow:
         self._selector_label_to_reg_id[self._curr_selector_label] = self._curr_reg_id
         self._selector_label_to_cls[self._curr_selector_label] = self._curr_reg_cls
         self._selector_label_to_param_vals[self._curr_selector_label] = copy(self._curr_param_vals)
+        self._selector_label_to_reg_num[self._curr_selector_label] = self._curr_reg_num
 
 
 
