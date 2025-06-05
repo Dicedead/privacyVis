@@ -56,7 +56,7 @@ class PrivacyWindow:
 
         self._selector_combob = None
         self._slider_frame: tk.Frame = None
-        self._curr_reg_id = -1
+        self._curr_reg_id = None
         self._region_counter = 0
         self._curr_reg_num = 0
 
@@ -64,6 +64,7 @@ class PrivacyWindow:
         self.build_selection_dropdown()
         self.build_addition_dropdown()
         self.build_slider_frame()
+        self.build_delete_buttons()
 
         self._window.mainloop()
 
@@ -74,7 +75,7 @@ class PrivacyWindow:
         privacy_toolbar_frame = tk.Frame(self._window)
         privacy_toolbar = NavigationToolbar2Tk(self._privacy_canvas, privacy_toolbar_frame)
         privacy_toolbar_frame.grid(column=0, row=3)
-        self._privacy_canvas.get_tk_widget().grid(column=0, row=0, rowspan=2)
+        self._privacy_canvas.get_tk_widget().grid(column=0, row=0, rowspan=3)
 
     def replot_privacy(self):
 
@@ -100,7 +101,7 @@ class PrivacyWindow:
 
         self.replot_privacy()
 
-    def schedule_removal(self, region_id: int):
+    def hide_region(self, region_id: int):
         self._privacy_fig.remove_region(region_id)
         # self.replot_privacy()
 
@@ -127,8 +128,8 @@ class PrivacyWindow:
             self.rebuild_slider_frame()
             self.replot_privacy()
 
-        selector_frame = tk.Frame(self._window)
-        selector_label = tk.Label(selector_frame, text="Select a region:")
+        selector_frame = tk.Frame(self._window, background="white")
+        selector_label = tk.Label(selector_frame, text="Select a region:", background="white")
         selector_label.pack()
 
         self._selector_combob = ttk.Combobox(selector_frame, textvariable=self._selector_val)
@@ -163,8 +164,8 @@ class PrivacyWindow:
 
             self._selector_val.set(selector_label)
 
-        adder_frame = tk.Frame(self._window)
-        adder_label = tk.Label(adder_frame, text="Add a region:")
+        adder_frame = tk.Frame(self._window, background="white")
+        adder_label = tk.Label(adder_frame, text="Add a region:", background="white")
         adder_label.pack()
 
         adder_val = tk.StringVar()
@@ -193,7 +194,7 @@ class PrivacyWindow:
         def slider_command(slider_param: str):
             def command(x):
                 self._curr_param_vals[slider_param] = slider_vars[slider_param].get()
-                self.schedule_removal(self._curr_reg_id)
+                self.hide_region(self._curr_reg_id)
                 self.add_region()
                 self.update_curr_reg()
             return command
@@ -224,12 +225,57 @@ class PrivacyWindow:
             label = tk.Label(self._slider_frame, text=labels_map[param])
             label.grid(column=0, row=idx)
 
+    def build_delete_buttons(self):
+
+        def remove_region():
+            if self._curr_reg_id is not None:
+                self.hide_region(self._curr_reg_id
+                                 )
+                ls = list(self._selector_combob['values'])
+                ls.pop(ls.index(self._curr_selector_label))
+                self._selector_combob['values'] = ls
+
+                self.replot_privacy()
+                self._curr_reg_id = None
+                self._curr_reg_cls = None
+                self._curr_param_vals = None
+                self._curr_reg_num = None
+
+                self._selector_label_to_reg_num.pop(self._curr_selector_label)
+                self._selector_label_to_cls.pop(self._curr_selector_label)
+                self._selector_label_to_param_vals.pop(self._curr_selector_label)
+                self._selector_label_to_reg_id.pop(self._curr_selector_label)
+
+                self.destroy_slider_frame()
+                self._selector_val.set("No region selected")
+
+        def remove_everything():
+            self._window.destroy()
+            newwindow = PrivacyWindow()
+
+        delete_frame = tk.Frame(self._window, background="white")
+
+        delete_reg_button = tk.Button(delete_frame,
+                                      text="Delete current region",
+                                      command=lambda: remove_region(),
+                                      bg="white"
+                                      )
+        delete_reg_button.pack()
+
+        delete_everything_button = tk.Button(delete_frame,
+                                             text="      Clear all      ",
+                                             command=lambda: remove_everything(),
+                                             bg="white"
+                                             )
+        delete_everything_button.pack()
+
+        delete_frame.grid(column=1, row=3)
+
     def update_curr_reg(self):
         self._selector_label_to_reg_id[self._curr_selector_label] = self._curr_reg_id
         self._selector_label_to_cls[self._curr_selector_label] = self._curr_reg_cls
         self._selector_label_to_param_vals[self._curr_selector_label] = copy(self._curr_param_vals)
         self._selector_label_to_reg_num[self._curr_selector_label] = self._curr_reg_num
-
 
 
 if __name__ == "__main__":

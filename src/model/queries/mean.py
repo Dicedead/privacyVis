@@ -46,8 +46,8 @@ class DPMean(DPQuery):
     @staticmethod
     def params_to_slider_labels() -> Dict[str, str]:
         return {
-            "eps" : "log(epsilon)",
-            "delta" : "delta",
+            "eps" : "log(ε)",
+            "delta" : "δ",
             "dataset_size" : "Dataset size",
             "dataset_diameter" : "Data diameter",
             "dimensions": "Number of dimensions"

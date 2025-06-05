@@ -100,8 +100,8 @@ class DPRegion(AdaptedRegionComputer):
     @staticmethod
     def params_to_slider_labels() -> Dict[str, str]:
         return {
-            'eps': 'log(epsilon)',
-            'delta': 'delta'
+            'eps': 'log(ε)',
+            'delta': 'δ'
         }
 
     @staticmethod

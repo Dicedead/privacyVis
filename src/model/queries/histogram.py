@@ -64,7 +64,7 @@ class DPHistogram(DPQuery):
     @staticmethod
     def params_to_slider_labels() -> Dict[str, str]:
         return {
-            "eps": "log(epsilon)",
+            "eps": "log(ε)",
             "num_bins": "Number of bins"
         }
 
