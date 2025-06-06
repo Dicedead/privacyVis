@@ -3,7 +3,7 @@ from typing import Any
 import numpy as np
 
 from definitions import TradeOffFunction
-from differential_privacy import tradeoff_eps_delta_dp_total_var
+from regions import tradeoff_eps_delta_dp_total_var
 from mechanism import Mechanism
 
 

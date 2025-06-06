@@ -14,12 +14,19 @@ _DPI = 100
 _RESOLUTION_NON_INTEGER = 0.05
 _RESOLUTION_INTEGER = 1
 _SLIDER_LENGTH = 200
-_COMBOB_LENGTH = 30
+_COMBOB_LENGTH = 35
 
 _REGION_VALUES = [
     DPRegion,
     DPBasicCompositionRegion,
-    DPExactCompositionRegion
+    DPExactCompositionRegion,
+    DPTVRegion,
+    DPTVCompositionRegion,
+    GaussianDPRegion,
+    GaussianDPCompositionRegion,
+    LaplaceMechanismRegion,
+    GaussianMechanismRegion,
+    RandomizedResponseRegion
 ]
 
 _ADDER_LABELS_TO_CLS_MAP = {}
@@ -92,6 +99,15 @@ class PrivacyWindow:
         self._privacy_canvas.flush_events()
         
     def add_region(self):
+        def _graph_label() -> str:
+            def _param_label(param: str):
+                if self._curr_reg_cls.params_are_integers()[param]:
+                    return f'{self._curr_reg_cls.params_to_graph_labels()[param]}: {construct_args[param]}'
+                return f'{self._curr_reg_cls.params_to_graph_labels()[param]}: {construct_args[param]:.2f}'
+
+            return f"{self._curr_reg_cls.region_graph_name()} ({", ".join(
+                [_param_label(param) for param in self._curr_reg_cls.params()])}) [#{self._curr_reg_num}]"
+
         construct_args = copy(self._curr_param_vals)
         for param in self._curr_reg_cls.params():
             if self._curr_reg_cls.params_are_logscale()[param]:
@@ -99,9 +115,7 @@ class PrivacyWindow:
 
         self._curr_reg_id = self._privacy_fig.add_region(
             self._curr_reg_cls.region_computation(**construct_args),
-            f"{self._curr_reg_cls.region_graph_name()} ({", ".join(
-                [f'{self._curr_reg_cls.params_to_graph_labels()[param]}: {construct_args[param]:.2f}'
-                 for param in self._curr_reg_cls.params()])}) [#{self._curr_reg_num}]"
+            _graph_label()
         )
 
         self.replot_privacy()
@@ -181,13 +195,13 @@ class PrivacyWindow:
         adder_combob['values'] = _REGION_VALUES
 
         adder_combob.bind('<<ComboboxSelected>>', onclick)
-        adder_frame.grid(column=1, row=2)
+        adder_frame.grid(column=1, row=1)
 
     def build_slider_frame(self):
         self._slider_frame = tk.Frame(self._window)
         self._slider_frame.columnconfigure(0, weight=1)
         self._slider_frame.columnconfigure(1, weight=10)
-        self._slider_frame.grid(column=1, row=1)
+        self._slider_frame.grid(column=1, row=2)
 
     def destroy_slider_frame(self):
         self._slider_frame.destroy()

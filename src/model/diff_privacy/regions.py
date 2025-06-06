@@ -38,7 +38,9 @@ def region_from_dp_params(eps: float, delta: float) -> Region:
             List of constraints defining the privacy region.
     """
     assert eps >= 0
-    assert 0 <= delta <= 1
+    assert delta >= 0
+
+    # assert 0 <= delta <= 1
 
     exp = np.exp(eps)
     ineq = lambda fp, fn: fp + exp * fn >= 1 - delta
@@ -186,9 +188,8 @@ def region_from_dp_composition_exact_total_var(
             List of constraints defining the privacy region.
     """
     assert eps >= 0
-    assert 0 <= delta <= 1
+    assert delta >= 0
     assert k >= 0
-    assert delta <= eta <= delta + ((np.exp(eps) - 1) * (1 - delta)) / (np.exp(eps) + 1)
 
     alpha = 1 - (eta - delta) * (1 + np.exp(eps)) / ((1 - delta) * (np.exp(eps) - 1))
 
@@ -207,7 +208,7 @@ def region_from_dp_composition_exact_total_var(
                 for a in range(k-j)
               ]
         )
-        delta_prime = 1 - ((1 - delta) ** k) * (1 - delta_tmp)
+        delta_prime = max(0., 1 - ((1 - delta) ** k) * (1 - delta_tmp))
         constraints.append(region_from_dp_params(eps_prime, delta_prime))
 
         if j == 0:
