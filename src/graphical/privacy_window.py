@@ -14,8 +14,13 @@ _DPI = 100
 _RESOLUTION_NON_INTEGER = 0.05
 _RESOLUTION_INTEGER = 1
 _SLIDER_LENGTH = 200
+_COMBOB_LENGTH = 30
 
-_REGION_VALUES = [DPRegion]
+_REGION_VALUES = [
+    DPRegion,
+    DPBasicCompositionRegion,
+    DPExactCompositionRegion
+]
 
 _ADDER_LABELS_TO_CLS_MAP = {}
 for cls in _REGION_VALUES:
@@ -94,7 +99,7 @@ class PrivacyWindow:
 
         self._curr_reg_id = self._privacy_fig.add_region(
             self._curr_reg_cls.region_computation(**construct_args),
-            f"{self._curr_reg_cls.adder_label()} ({", ".join(
+            f"{self._curr_reg_cls.region_graph_name()} ({", ".join(
                 [f'{self._curr_reg_cls.params_to_graph_labels()[param]}: {construct_args[param]:.2f}'
                  for param in self._curr_reg_cls.params()])}) [#{self._curr_reg_num}]"
         )
@@ -132,7 +137,7 @@ class PrivacyWindow:
         selector_label = tk.Label(selector_frame, text="Select a region:", background="white")
         selector_label.pack()
 
-        self._selector_combob = ttk.Combobox(selector_frame, textvariable=self._selector_val)
+        self._selector_combob = ttk.Combobox(selector_frame, textvariable=self._selector_val, width=_COMBOB_LENGTH)
         self._selector_combob.pack()
 
         self._selector_combob['state'] = 'readonly'
@@ -169,7 +174,7 @@ class PrivacyWindow:
         adder_label.pack()
 
         adder_val = tk.StringVar()
-        adder_combob = ttk.Combobox(adder_frame, textvariable=adder_val)
+        adder_combob = ttk.Combobox(adder_frame, textvariable=adder_val, width=_COMBOB_LENGTH)
         adder_combob.pack()
 
         adder_combob['state'] = 'readonly'

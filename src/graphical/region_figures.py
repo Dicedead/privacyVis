@@ -148,9 +148,7 @@ class MultiRegionFigure:
     def _region_comparator(prioritize_region: int):
 
         def inner(region1: Tuple[np.ndarray, str, int], region2: Tuple[np.ndarray, str, int]):
-            print(region1[2], region2[2])
-            print(prioritize_region)
-            # TODO maybe by graph label?
+
             if region1[2] == prioritize_region:
                 return -1
             elif region2[2] == prioritize_region:
