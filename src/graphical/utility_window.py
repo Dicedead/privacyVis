@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 from typing import Type
 
 import numpy as np
@@ -43,6 +44,7 @@ class UtilityWindow:
         self._utility_plot = None
         self._privacy_canvas = None
         self._privacy_fig = None
+        self._log_y = tk.BooleanVar(value=False)
 
         self.build_sliders(main_param)
         self.plot_utility(main_param)
@@ -51,7 +53,7 @@ class UtilityWindow:
         self._window.mainloop()
 
     def plot_utility(self, main_param: str):
-        utility_fig = Figure(figsize=(5, 5), dpi=100)
+        utility_fig = Figure(figsize=(6, 6), dpi=100)
 
         self._utility_plot = utility_fig.add_subplot()
         self._utility_canvas = FigureCanvasTkAgg(utility_fig, master=self._window)
@@ -59,6 +61,13 @@ class UtilityWindow:
 
         utility_toolbar_frame = tk.Frame(self._window)
         utility_toolbar = NavigationToolbar2Tk(self._utility_canvas, utility_toolbar_frame)
+        log_utility_check = ttk.Checkbutton(
+            utility_toolbar_frame,
+            command= lambda: self.replot_utility(main_param),
+            text='Logarithmic y-axis',
+            variable=self._log_y
+        )
+        log_utility_check.pack()
         utility_toolbar_frame.grid(column=0, row=1, sticky="n")
         self._utility_canvas.get_tk_widget().grid(column=0, row=0)
 
@@ -69,10 +78,10 @@ class UtilityWindow:
         kwargs_builder = {}
         if self._dpqcls.params_are_in_logscale()[main_param]:
             x_vals = np.logspace(*self._dpqcls.params_to_limits()[main_param])
-            utility_plotting_func = utility_plot.loglog
+            utility_plotting_func = utility_plot.loglog if self._log_y.get() else utility_plot.semilogx
         else:
             x_vals = np.linspace(*self._dpqcls.params_to_limits()[main_param])
-            utility_plotting_func = utility_plot.plot
+            utility_plotting_func = utility_plot.semilogy if self._log_y.get() else utility_plot.plot
 
         kwargs_builder.update({self._dpqcls.params_to_kwargs()[main_param]: x_vals})
 
@@ -91,8 +100,8 @@ class UtilityWindow:
         utility_plotting_func(x_vals, self._dpqcls.utility_func(**kwargs_builder))
         utility_plot.axvline(x=main_param_val, color='black', linestyle='--')
         utility_plot.set_xlabel(self._dpqcls.params_to_graph_labels()[main_param])
-        utility_plot.set_ylabel(self._dpqcls.utility_label())
-        utility_plot.set_title("Utility")
+        utility_plot.set_title(self._dpqcls.utility_label())
+        #utility_plot.set_title("Utility")
 
         self._utility_canvas.draw()
         self._utility_canvas.flush_events()
@@ -168,5 +177,5 @@ class UtilityWindow:
         slider_frame.grid(column=0, row=2)
 
 if __name__ == "__main__":
-    # utility_window = UtilityWindow(DPHistogram, "eps")
-    utility_window = UtilityWindow(DPMean, "delta")
+    utility_window = UtilityWindow(DPHistogram, "eps")
+    # utility_window = UtilityWindow(DPMean, "delta")
