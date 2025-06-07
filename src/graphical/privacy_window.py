@@ -65,6 +65,7 @@ class PrivacyWindow:
         self._selector_label_to_reg_id: Dict[str, int] = {}
         self._selector_label_to_cls: Dict[str, Type[AdaptedRegionComputer]] = {}
         self._selector_label_to_reg_num: Dict[str, int] = {}
+        self._toggle_reordering = tk.BooleanVar(value=False)
 
         self._selector_combob = None
         self._slider_frame: tk.Frame = None
@@ -91,7 +92,8 @@ class PrivacyWindow:
 
     def replot_privacy(self):
 
-        prioritized_reg = -1 if self._curr_selector_label in _INITIAL_SELECTOR_VALUES else self._curr_reg_id
+        prioritized_reg = -1 if (self._curr_selector_label in _INITIAL_SELECTOR_VALUES) or not self._toggle_reordering.get()\
+            else self._curr_reg_id
 
         self._privacy_fig.clear_figure()
         self._privacy_fig.draw_figure(_PRIVACY_PLOT_TITLE, prioritize_region=prioritized_reg)
@@ -153,6 +155,12 @@ class PrivacyWindow:
 
         self._selector_combob = ttk.Combobox(selector_frame, textvariable=self._selector_val, width=_COMBOB_LENGTH)
         self._selector_combob.pack()
+        reordering_toggle = ttk.Checkbutton(selector_frame,
+                                            text="Selected region in front",
+                                            command=lambda: self.replot_privacy(),
+                                            variable=self._toggle_reordering
+                                            )
+        reordering_toggle.pack()
 
         self._selector_combob['state'] = 'readonly'
         self._selector_combob['values'] = _INITIAL_SELECTOR_VALUES
