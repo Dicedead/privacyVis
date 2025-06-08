@@ -104,7 +104,7 @@ class PrivacyWindow:
         def _graph_label() -> str:
             def _param_label(param: str):
                 if self._curr_reg_cls.params_are_integers()[param]:
-                    return f'{self._curr_reg_cls.params_to_graph_labels()[param]}: {construct_args[param]}'
+                    return f'{self._curr_reg_cls.params_to_graph_labels()[param]}: {int(construct_args[param])}'
                 return f'{self._curr_reg_cls.params_to_graph_labels()[param]}: {construct_args[param]:.2f}'
 
             return f"{self._curr_reg_cls.region_graph_name()} ({", ".join(

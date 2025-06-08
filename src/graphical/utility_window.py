@@ -118,6 +118,14 @@ class UtilityWindow:
         self._privacy_canvas.get_tk_widget().grid(column=1, row=0, rowspan=3)
 
     def replot_privacy(self):
+        def _graph_label() -> str:
+            def _param_label(param: str):
+                if self._dpqcls.params_are_integers()[param]:
+                    return f'{self._dpqcls.params_to_graph_labels()[param]}: {int(construct_args[param])}'
+                return f'{self._dpqcls.params_to_graph_labels()[param]}: {construct_args[param]:.2f}'
+            return f"({", ".join([_param_label(param) for param in self._dpqcls.params() 
+                                  if self._dpqcls.params_change_privacy()[param]])})"
+
         self._privacy_fig.reset_figure()
         construct_args = {param: self._param_vals[param].get() for param in self._dpqcls.params()}
         for param in self._dpqcls.params():
@@ -127,8 +135,8 @@ class UtilityWindow:
 
         self._privacy_fig.add_region(
             self._dpqcls(**construct_args).privacy_region(),
-            f"({", ".join([f'{self._dpqcls.params_to_graph_labels()[param]}: {construct_args[param]:.2f}'
-                           for param in self._dpqcls.params() if self._dpqcls.params_change_privacy()[param]])})")
+            _graph_label()
+        )
         self._privacy_fig.finish_figure(_PRIVACY_PLOT_TITLE)
 
         self._privacy_canvas.draw()

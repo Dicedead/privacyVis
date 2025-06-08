@@ -3,15 +3,19 @@ import tkinter.ttk as ttk
 
 from histogram import DPHistogram
 from mean import DPMean
+from randomized_response import RandomizedResponse
+
 from privacy_window import PrivacyWindow
 from utility_window import UtilityWindow
+
+_BUTTON_LENGTH = 30
 
 class MainWindow:
     def __init__(self):
         self._window = tk.Tk()
         self._window.configure(background="white")
         self._window.title("Differential privacy")
-        self._window.geometry("250x150")
+        self._window.geometry("250x200")
 
         self._window.rowconfigure(0, weight=1)
         self._window.rowconfigure(1, weight=1)
@@ -32,7 +36,8 @@ class MainWindow:
 
         privacy_button = ttk.Button(self._window,
                                     text="Open privacy window",
-                                    command=lambda: onclick()
+                                    command=lambda: onclick(),
+                                    width=_BUTTON_LENGTH
                                     )
         privacy_button.grid(column=0, row=1)
 
@@ -46,13 +51,23 @@ class MainWindow:
                 UtilityWindow(DPMean, "delta")
             elif curr_val == "DP Mean (ε)":
                 UtilityWindow(DPMean, "delta")
+            elif curr_val == "Randomized response (ε)":
+                UtilityWindow(RandomizedResponse, "eps")
+            elif curr_val == "Randomized response (alphabet size)":
+                UtilityWindow(RandomizedResponse, "alphabet_size")
             else:
                 raise ValueError("Unknown utility")
 
         utilities_frame = tk.Frame(self._window, background="white")
 
-        combob_utilities = ttk.Combobox(utilities_frame, width=20)
-        combob_utilities['values'] = ("DP Histogram (ε)", "DP Mean (ε)", "DP Mean (δ)")
+        combob_utilities = ttk.Combobox(utilities_frame, width=_BUTTON_LENGTH)
+        combob_utilities['values'] = (
+            "DP Histogram (ε)",
+            "DP Mean (ε)",
+            "DP Mean (δ)",
+            "Randomized response (ε)",
+            "Randomized response (alphabet size)"
+        )
         combob_utilities['state'] = 'readonly'
         combob_utilities.bind('<<ComboboxSelected>>', onclick)
 

@@ -7,7 +7,7 @@ from regions import tradeoff_eps_delta_dp_total_var
 from mechanism import Mechanism
 
 
-class RandomizedResponse(Mechanism):
+class RandomizedResponseMech(Mechanism):
     """
     Define the privacy region and the utility proxy of randomized response.
     """
@@ -23,10 +23,8 @@ class RandomizedResponse(Mechanism):
                 Size of randomized input alphabet.
         """
         super().__init__(eps, 0)
-        exp_eps = np.exp(eps)
-        self._denom = 1/(exp_eps + alphabet_size - 1)
         self._alphabet_size = alphabet_size
-        self._p_eps = (exp_eps - 1) * self._denom
+        self._p_eps = 1 - RandomizedResponseMech.compute_randomized_response_proba(eps, self._alphabet_size)
         self._total_var = self._p_eps
 
     def switch_probability(self) -> float:
@@ -39,8 +37,10 @@ class RandomizedResponse(Mechanism):
 
     @staticmethod
     def compute_randomized_response_proba(eps: float, alphabet_size: int) -> float:
-        # TODO
-        pass
+        exp_eps = np.exp(eps)
+        denom = 1/(exp_eps + alphabet_size - 1)
+        p_eps = (exp_eps - 1) * denom
+        return 1 - p_eps
 
     @staticmethod
     def compute_randomized_response_epsilon(p: float, alphabet_size: int) -> float:

@@ -4,7 +4,7 @@ from typing import Callable, Any, Dict, Tuple
 from definitions import Region
 from regions import *
 
-from mechanisms import laplace_mechanism, gaussian_mechanism, randomized_response
+from mechanisms import laplace_mechanism, gaussian_mechanism, randomized_response_mechanism
 
 
 class AdaptedRegionComputer(ABC):
@@ -687,7 +687,7 @@ class GaussianMechanismRegion(AdaptedRegionComputer):
 class RandomizedResponseRegion(AdaptedRegionComputer):
     @staticmethod
     def region_computation(*args, **kwargs) -> Region:
-        return randomized_response.RandomizedResponse(kwargs['eps'], kwargs['m']).region_exact()
+        return randomized_response_mechanism.RandomizedResponseMech(kwargs['eps'], kwargs['m']).region_exact()
 
     @staticmethod
     def params() -> List[str]:
