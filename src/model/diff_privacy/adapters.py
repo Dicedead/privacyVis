@@ -562,7 +562,7 @@ class GaussianDPCompositionRegion(AdaptedRegionComputer):
 class LaplaceMechanismRegion(AdaptedRegionComputer):
     @staticmethod
     def region_computation(*args, **kwargs) -> Region:
-        return laplace_mechanism.LaplaceMechanism(kwargs['eps'], 1).region_exact()
+        return laplace_mechanism.LaplaceMechanism(kwargs['eps'], 1).privacy_region()
 
     @staticmethod
     def params() -> List[str]:
@@ -621,7 +621,7 @@ class LaplaceMechanismRegion(AdaptedRegionComputer):
 class GaussianMechanismRegion(AdaptedRegionComputer):
     @staticmethod
     def region_computation(*args, **kwargs) -> Region:
-        return gaussian_mechanism.GaussianMechanism(kwargs['eps'], kwargs['delta'], 1).region_exact()
+        return gaussian_mechanism.GaussianMechanism(kwargs['eps'], kwargs['delta'], 1).privacy_region()
 
     @staticmethod
     def params() -> List[str]:
@@ -687,7 +687,7 @@ class GaussianMechanismRegion(AdaptedRegionComputer):
 class RandomizedResponseRegion(AdaptedRegionComputer):
     @staticmethod
     def region_computation(*args, **kwargs) -> Region:
-        return randomized_response_mechanism.RandomizedResponseMech(kwargs['eps'], kwargs['m']).region_exact()
+        return randomized_response_mechanism.RandomizedResponseMech(kwargs['eps'], kwargs['m']).privacy_region()
 
     @staticmethod
     def params() -> List[str]:

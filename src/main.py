@@ -3,6 +3,7 @@ import tkinter.ttk as ttk
 
 from histogram import DPHistogram
 from mean import DPMean
+from median import DPMedian
 from randomized_response import RandomizedResponse
 
 from privacy_window import PrivacyWindow
@@ -51,6 +52,10 @@ class MainWindow:
                 UtilityWindow(DPMean, "delta")
             elif curr_val == "DP Mean (ε)":
                 UtilityWindow(DPMean, "delta")
+            elif curr_val == "DP Median (ε)":
+                UtilityWindow(DPMedian, "eps")
+            elif curr_val == "DP Median (alphabet size)":
+                UtilityWindow(DPMedian, "alphabet_size")
             elif curr_val == "Randomized response (ε)":
                 UtilityWindow(RandomizedResponse, "eps")
             elif curr_val == "Randomized response (alphabet size)":
@@ -65,6 +70,8 @@ class MainWindow:
             "DP Histogram (ε)",
             "DP Mean (ε)",
             "DP Mean (δ)",
+            "DP Median (ε)",
+            "DP Median (alphabet size)",
             "Randomized response (ε)",
             "Randomized response (alphabet size)"
         )

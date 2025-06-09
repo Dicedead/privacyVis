@@ -55,7 +55,7 @@ class DPHistogram(DPQuery):
         return self._laplace(self._hist.apply(x))
 
     def privacy_region(self, *args, **kwargs):
-        return self._laplace.region_exact()
+        return self._laplace.privacy_region()
 
     @staticmethod
     def params() -> List[str]:

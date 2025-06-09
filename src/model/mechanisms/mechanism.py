@@ -35,9 +35,9 @@ class Mechanism(ABC):
         """
         pass
 
-    def region_exact(self) -> Region:
+    def privacy_region(self) -> Region:
         """
-        Define the tradeoff-function induced (exact) region.
+        Ideally, define the tradeoff-function induced (exact) region.
         :return: Region
         """
         return region_from_f_dp(self.tradeoff_function())

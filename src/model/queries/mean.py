@@ -88,7 +88,7 @@ class DPMean(DPQuery):
         return "Mean squared error"
 
     def privacy_region(self, *args, **kwargs):
-        return self._gaussian_mech.region_exact()
+        return self._gaussian_mech.privacy_region()
 
     @staticmethod
     def pretty_name() -> str:

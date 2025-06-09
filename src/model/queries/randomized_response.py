@@ -18,7 +18,7 @@ class RandomizedResponse(DPQuery):
         return self._rr(x)
 
     def privacy_region(self, *args, **kwargs):
-        return self._rr.region_exact()
+        return self._rr.privacy_region()
 
     @staticmethod
     def utility_func(*args, **kwargs):
