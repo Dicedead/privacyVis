@@ -9,12 +9,14 @@ from region_figures import MultiRegionFigure
 from adapters import *
 
 _WINDOW_SIZE = "1300x900"
+_INTERSECTOR_WINDOW_SIZE = "500x200"
 _FIGSIZE = (7, 7)
 _DPI = 100
 _RESOLUTION_NON_INTEGER = 0.05
 _RESOLUTION_INTEGER = 1
 _SLIDER_LENGTH = 200
 _COMBOB_LENGTH = 35
+_INTERSECT_REGIONS = "Intersect regions"
 
 _REGION_VALUES = [
     DPRegion,
@@ -34,11 +36,13 @@ for cls in _REGION_VALUES:
     _ADDER_LABELS_TO_CLS_MAP[cls.adder_label()] = cls
 
 _REGION_VALUES = [cls.adder_label() for cls in _REGION_VALUES]
+_REGION_VALUES.append(_INTERSECT_REGIONS)
 
 _INITIAL_SELECTOR_VALUES = ["No region selected"]
 _PRIVACY_PLOT_TITLE = "Differential privacy"
 
 class PrivacyWindow:
+
     def __init__(self, window_size=_WINDOW_SIZE):
         self._window = tk.Tk()
         self._window.title(f"Privacy regions")
@@ -92,7 +96,8 @@ class PrivacyWindow:
 
     def replot_privacy(self):
 
-        prioritized_reg = -1 if (self._curr_selector_label in _INITIAL_SELECTOR_VALUES) or not self._toggle_reordering.get()\
+        prioritized_reg = -1 if ((self._curr_selector_label in _INITIAL_SELECTOR_VALUES)
+                                 or not self._toggle_reordering.get())\
             else self._curr_reg_id
 
         self._privacy_fig.clear_figure()
@@ -107,14 +112,13 @@ class PrivacyWindow:
                     return f'{self._curr_reg_cls.params_to_graph_labels()[param]}: {int(construct_args[param])}'
                 return f'{self._curr_reg_cls.params_to_graph_labels()[param]}: {construct_args[param]:.2f}'
 
+            if not self._curr_reg_cls.params():
+                return f"{self._curr_reg_cls.region_graph_name()} [#{self._curr_reg_num}]"
+
             return f"{self._curr_reg_cls.region_graph_name()} ({", ".join(
                 [_param_label(param) for param in self._curr_reg_cls.params()])}) [#{self._curr_reg_num}]"
 
-        construct_args = copy(self._curr_param_vals)
-        for param in self._curr_reg_cls.params():
-            if self._curr_reg_cls.params_are_logscale()[param]:
-                construct_args[param] = 10 ** self._curr_param_vals[param]
-
+        construct_args = PrivacyWindow._construct_kwargs_from_params(self._curr_param_vals, self._curr_reg_cls)
         self._curr_reg_id = self._privacy_fig.add_region(
             self._curr_reg_cls.region_computation(**construct_args),
             _graph_label()
@@ -124,7 +128,6 @@ class PrivacyWindow:
 
     def hide_region(self, region_id: int):
         self._privacy_fig.remove_region(region_id)
-        # self.replot_privacy()
 
     def build_selection_dropdown(self):
 
@@ -169,27 +172,68 @@ class PrivacyWindow:
 
         selector_frame.grid(column=1, row=0)
 
+    def build_intersection_window(self):
+
+        def command_main_button():
+            intersection_region = list(contained_regions.values())
+            intersection_name = text_box.get("1.0", tk.END).strip()
+            self._curr_reg_cls = intersected_regions(intersection_region, intersection_name)
+            intersector_window.destroy()
+            self._finish_adding(intersection_name)
+            #self._window.update()
+
+        intersector_window = tk.Tk()
+        intersector_window.title(f"Intersection of regions")
+        intersector_window.geometry(_INTERSECTOR_WINDOW_SIZE)
+
+        contained_regions = {}
+
+        combob_vals = copy(self._selector_combob['values'])
+        combob_vals = combob_vals[1:]
+        for region_label in combob_vals:
+            def onclick():
+                if region_label in contained_regions.keys():
+                    contained_regions.pop(region_label)
+
+                region = region_cls.region_computation(
+                        **PrivacyWindow._construct_kwargs_from_params(region_params, region_cls)
+                )
+                contained_regions[region_label] = region
+
+
+            region_cls = self._selector_label_to_cls[region_label]
+            region_params = self._selector_label_to_param_vals[region_label]
+
+            checkbox = ttk.Checkbutton(intersector_window,
+                text=region_label,
+                command=lambda: onclick()
+            )
+            checkbox.pack()
+
+        text_box = tk.Text(intersector_window, height=5, width=40)
+        text_box.pack()
+        text_box.insert(tk.END, "default name")
+
+        button = tk.Button(intersector_window,
+                           text="Intersect regions",
+                           command=lambda: command_main_button()
+                           )
+        button.pack()
+        intersector_window.mainloop()
+
+
     def build_addition_dropdown(self):
         def onclick(event):
             curr_val = adder_val.get()
-            self._region_counter += 1
-            self._curr_reg_num = self._region_counter
-            selector_label = curr_val + f" [#{self._region_counter}]"
-            
-            ls = list(self._selector_combob['values'])
-            ls.append(selector_label)
-            self._selector_combob['values'] = ls
+            if curr_val != _INTERSECT_REGIONS:
+                self._curr_reg_cls = _ADDER_LABELS_TO_CLS_MAP[curr_val]
+            else:
+                if len(self._selector_combob['values']) == 1:
+                    return
+                self.build_intersection_window()
+                return
 
-            self._curr_reg_cls = _ADDER_LABELS_TO_CLS_MAP[curr_val]
-            self._curr_param_vals = self._curr_reg_cls.params_to_default_vals()
-
-            self.add_region()
-            self.rebuild_slider_frame()
-
-            self._curr_selector_label = selector_label
-            self.update_curr_reg()
-
-            self._selector_val.set(selector_label)
+            self._finish_adding(curr_val)
 
         adder_frame = tk.Frame(self._window, background="white")
         adder_label = tk.Label(adder_frame, text="Add a region:", background="white")
@@ -304,6 +348,33 @@ class PrivacyWindow:
         self._selector_label_to_param_vals[self._curr_selector_label] = copy(self._curr_param_vals)
         self._selector_label_to_reg_num[self._curr_selector_label] = self._curr_reg_num
 
+    def _finish_adding(self, curr_val):
+        self._region_counter += 1
+        self._curr_reg_num = self._region_counter
+        selector_label = curr_val + f" [#{self._region_counter}]"
+
+        ls = list(self._selector_combob['values'])
+        ls.append(selector_label)
+        self._selector_combob['values'] = ls
+
+        self._curr_param_vals = self._curr_reg_cls.params_to_default_vals()
+
+        self.add_region()
+        self.rebuild_slider_frame()
+
+        self._curr_selector_label = selector_label
+        self.update_curr_reg()
+
+        self._selector_val.set(selector_label)
+
+    @staticmethod
+    def _construct_kwargs_from_params(region_params: Dict[str, float], region_cls: Type[AdaptedRegionComputer]):
+        construct_args = copy(region_params)
+        for param in region_cls.params():
+            if region_cls.params_are_logscale()[param]:
+                construct_args[param] = 10 ** region_params[param]
+
+        return construct_args
 
 if __name__ == "__main__":
     PrivacyWindow()

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Any, Dict, Tuple
+from typing import Callable, Any, Dict, Tuple, Type
 
 from definitions import Region
 from regions import *
@@ -64,6 +64,55 @@ class AdaptedRegionComputer(ABC):
     def region_graph_name() -> str:
         pass
 
+
+def intersected_regions(regions: List[Region], name: str) -> Type[AdaptedRegionComputer]:
+    class IntersectedRegions(AdaptedRegionComputer):
+
+        @staticmethod
+        def region_computation(*args, **kwargs) -> Region:
+            return intersect_regions(regions)
+
+        @staticmethod
+        def params() -> List[str]:
+            return []
+
+        @staticmethod
+        def params_to_kwargs() -> Dict[str, str]:
+            return {}
+
+        @staticmethod
+        def params_are_integers() -> Dict[str, bool]:
+            return {}
+
+        @staticmethod
+        def params_are_logscale() -> Dict[str, bool]:
+            return {}
+
+        @staticmethod
+        def params_to_slider_labels() -> Dict[str, str]:
+            return {}
+
+        @staticmethod
+        def params_to_graph_labels() -> Dict[str, str]:
+            return {}
+
+        @staticmethod
+        def params_to_default_vals() -> Dict[str, float]:
+            return {}
+
+        @staticmethod
+        def params_to_limits() -> Dict[str, Tuple[float, float]]:
+            return {}
+
+        @staticmethod
+        def adder_label() -> str:
+            return {}
+
+        @staticmethod
+        def region_graph_name() -> str:
+            return name
+
+    return IntersectedRegions
 
 class DPRegion(AdaptedRegionComputer):
     @staticmethod

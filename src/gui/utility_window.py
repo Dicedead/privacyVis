@@ -186,4 +186,3 @@ class UtilityWindow:
 
 if __name__ == "__main__":
     utility_window = UtilityWindow(DPHistogram, "eps")
-    # utility_window = UtilityWindow(DPMean, "delta")
