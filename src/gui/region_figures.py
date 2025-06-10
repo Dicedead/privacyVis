@@ -94,20 +94,22 @@ class MultiRegionFigure:
     def finish_figure(self, title=""):
         self.draw_figure(title=title)
 
-    def draw_figure(self, title="", prioritize_region=-1):
+    def draw_figure(self, title="", prioritize_region=-1, show_legend=True):
         shown_regions = [(reg[0], reg[1], idx) for idx, reg in enumerate(self._labelled_regions) if reg is not _TO_REMOVE]
         labels = []
 
         for idx, labelled_computed_region in enumerate(self._compute_and_sort_regions(shown_regions, prioritize_region)):
-            k = idx + 1
+            k = (idx + 1) % len(self._palette)
             computed_region, label = labelled_computed_region
             self._plot.imshow(self._palette[k * computed_region],
                        extent=(self._start, self._stop, self._start, self._stop),
                        origin="lower")
             labels.append(label)
-        patches = [mpatches.Patch(color=self._palette[(i+1) % len(self._palette)]/255., label=lab)
-                   for i, lab in enumerate(labels)]
-        self._plot.legend(handles=patches)
+
+        if show_legend:
+            patches = [mpatches.Patch(color=self._palette[(i+1) % len(self._palette)]/255., label=lab)
+                       for i, lab in enumerate(labels)]
+            self._plot.legend(handles=patches)
         self._plot.set(xlim=(self._start, self._stop), ylim=(self._start, self._stop))
         self._plot.set_title(title)
         self._plot.set(xlabel="FN", ylabel="FP")

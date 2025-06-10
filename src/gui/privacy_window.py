@@ -9,7 +9,11 @@ from region_figures import MultiRegionFigure
 from adapters import *
 
 _WINDOW_SIZE = "1300x900"
-_INTERSECTOR_WINDOW_SIZE = "500x200"
+
+_INTERSECTOR_HEIGHT_FACTOR = 25
+_INTERSECTOR_BASE_HEIGHT = 50
+_INTERSECTOR_WIDTH = 300
+
 _FIGSIZE = (7, 7)
 _DPI = 100
 _RESOLUTION_NON_INTEGER = 0.05
@@ -17,6 +21,7 @@ _RESOLUTION_INTEGER = 1
 _SLIDER_LENGTH = 200
 _COMBOB_LENGTH = 35
 _INTERSECT_REGIONS = "Intersect regions"
+_DEFAULT_REGION_INTERSECTION_NAME = "Intersection"
 
 _REGION_VALUES = [
     DPRegion,
@@ -177,42 +182,56 @@ class PrivacyWindow:
         def command_main_button():
             intersection_region = list(contained_regions.values())
             intersection_name = text_box.get("1.0", tk.END).strip()
+
+            if not intersection_region:
+                intersector_window.destroy()
+                return
+
+            if not intersection_name:
+                intersection_name = "Intersection"
+
             self._curr_reg_cls = intersected_regions(intersection_region, intersection_name)
             intersector_window.destroy()
             self._finish_adding(intersection_name)
-            #self._window.update()
+
+        def onclick(reg_label):
+            def inner():
+
+                if reg_label in contained_regions.keys():
+                    contained_regions.pop(reg_label)
+                else:
+                    region = self._selector_label_to_cls[reg_label].region_computation(
+                        **PrivacyWindow._construct_kwargs_from_params(
+                            self._selector_label_to_param_vals[reg_label],
+                            self._selector_label_to_cls[reg_label]
+                        )
+                    )
+                    contained_regions[reg_label] = region
+
+            return inner
 
         intersector_window = tk.Tk()
         intersector_window.title(f"Intersection of regions")
-        intersector_window.geometry(_INTERSECTOR_WINDOW_SIZE)
+        height = len(self._selector_combob['values']) * _INTERSECTOR_HEIGHT_FACTOR + _INTERSECTOR_BASE_HEIGHT
+        length = _INTERSECTOR_WIDTH
+        intersector_window.geometry(f"{length}x{height}")
+        intersector_window.configure(background="white")
 
         contained_regions = {}
 
         combob_vals = copy(self._selector_combob['values'])
         combob_vals = combob_vals[1:]
         for region_label in combob_vals:
-            def onclick():
-                if region_label in contained_regions.keys():
-                    contained_regions.pop(region_label)
-
-                region = region_cls.region_computation(
-                        **PrivacyWindow._construct_kwargs_from_params(region_params, region_cls)
-                )
-                contained_regions[region_label] = region
-
-
-            region_cls = self._selector_label_to_cls[region_label]
-            region_params = self._selector_label_to_param_vals[region_label]
-
-            checkbox = ttk.Checkbutton(intersector_window,
+            checkbox = tk.Checkbutton(intersector_window,
                 text=region_label,
-                command=lambda: onclick()
+                command=onclick(region_label),
+                bg="white"
             )
             checkbox.pack()
 
-        text_box = tk.Text(intersector_window, height=5, width=40)
+        text_box = tk.Text(intersector_window, height=2, width=30)
         text_box.pack()
-        text_box.insert(tk.END, "default name")
+        text_box.insert(tk.END, _DEFAULT_REGION_INTERSECTION_NAME)
 
         button = tk.Button(intersector_window,
                            text="Intersect regions",

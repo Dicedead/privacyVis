@@ -722,7 +722,7 @@ class GaussianMechanismRegion(AdaptedRegionComputer):
     def params_to_limits() -> Dict[str, Tuple[float, float]]:
         return {
             'eps': (-3, 1),
-            'delta': (0.0, 1.0)
+            'delta': (0.05, 1.0)
         }
 
     @staticmethod
