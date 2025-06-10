@@ -75,7 +75,7 @@ class PrivacyWindow:
         self._selector_label_to_cls: Dict[str, Type[AdaptedRegionComputer]] = {}
         self._selector_label_to_reg_num: Dict[str, int] = {}
         self._toggle_reordering = tk.BooleanVar(value=False)
-
+        self._show_legend = tk.BooleanVar(value=True)
         self._selector_combob = None
         self._slider_frame: tk.Frame = None
         self._curr_reg_id = None
@@ -95,6 +95,12 @@ class PrivacyWindow:
         self._privacy_canvas = FigureCanvasTkAgg(self._privacy_fig.get_figure(), master=self._window)
 
         privacy_toolbar_frame = tk.Frame(self._window)
+        privacy_legend = ttk.Checkbutton(privacy_toolbar_frame,
+                                         text="Show legend",
+                                         command=lambda: self.replot_privacy(),
+                                         variable=self._show_legend
+                                         )
+        privacy_legend.pack()
         privacy_toolbar = NavigationToolbar2Tk(self._privacy_canvas, privacy_toolbar_frame)
         privacy_toolbar_frame.grid(column=0, row=3)
         self._privacy_canvas.get_tk_widget().grid(column=0, row=0, rowspan=3)
@@ -106,7 +112,10 @@ class PrivacyWindow:
             else self._curr_reg_id
 
         self._privacy_fig.clear_figure()
-        self._privacy_fig.draw_figure(_PRIVACY_PLOT_TITLE, prioritize_region=prioritized_reg)
+        self._privacy_fig.draw_figure(_PRIVACY_PLOT_TITLE,
+                                      prioritize_region=prioritized_reg,
+                                      show_legend=self._show_legend.get()
+                                      )
         self._privacy_canvas.draw()
         self._privacy_canvas.flush_events()
         
