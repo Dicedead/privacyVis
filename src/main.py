@@ -78,9 +78,9 @@ class MainWindow:
         combob_utilities['state'] = 'readonly'
         combob_utilities.bind('<<ComboboxSelected>>', onclick)
 
-        utilites_label = tk.Label(utilities_frame, text="Open privacy/utility trade-off window", bg="white")
+        utilities_label = tk.Label(utilities_frame, text="Open privacy/utility trade-off window", bg="white")
 
-        utilites_label.pack()
+        utilities_label.pack()
         combob_utilities.pack()
 
         utilities_frame.grid(column=0, row=2)
