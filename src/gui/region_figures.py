@@ -112,7 +112,7 @@ class MultiRegionFigure:
             self._plot.legend(handles=patches)
         self._plot.set(xlim=(self._start, self._stop), ylim=(self._start, self._stop))
         self._plot.set_title(title)
-        self._plot.set(xlabel="FN", ylabel="FP")
+        self._plot.set(xlabel="False negative probability", ylabel="False positive probability")
 
     def show_figure(self):
         self._fig.show()

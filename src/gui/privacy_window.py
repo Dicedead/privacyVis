@@ -74,7 +74,7 @@ class PrivacyWindow:
         self._selector_label_to_reg_id: Dict[str, int] = {}
         self._selector_label_to_cls: Dict[str, Type[AdaptedRegionComputer]] = {}
         self._selector_label_to_reg_num: Dict[str, int] = {}
-        self._toggle_reordering = tk.BooleanVar(value=False)
+        self._toggle_reordering = tk.BooleanVar(value=True)
         self._show_legend = tk.BooleanVar(value=True)
         self._selector_combob = None
         self._slider_frame: tk.Frame = None
