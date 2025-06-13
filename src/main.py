@@ -9,14 +9,14 @@ from randomized_response import RandomizedResponse
 from privacy_window import PrivacyWindow
 from utility_window import UtilityWindow
 
-_BUTTON_LENGTH = 30
+_BUTTON_LENGTH = 50
 
 class MainWindow:
     def __init__(self):
         self._window = tk.Tk()
         self._window.configure(background="white")
         self._window.title("Differential privacy")
-        self._window.geometry("250x200")
+        self._window.geometry("400x200")
 
         self._window.rowconfigure(0, weight=1)
         self._window.rowconfigure(1, weight=1)
@@ -46,15 +46,15 @@ class MainWindow:
         def onclick(event):
             curr_val = combob_utilities.get()
             self._window.destroy()
-            if curr_val == "DP Histogram (ε)":
+            if curr_val == "DP Histogram with Laplace mechanism (ε)":
                 UtilityWindow(DPHistogram, "eps")
-            elif curr_val == "DP Mean (δ)":
+            elif curr_val == "DP Mean with Gaussian mechanism (δ)":
+                UtilityWindow(DPMean, "eps")
+            elif curr_val == "DP Mean with Gaussian mechanism (ε)":
                 UtilityWindow(DPMean, "delta")
-            elif curr_val == "DP Mean (ε)":
-                UtilityWindow(DPMean, "delta")
-            elif curr_val == "DP Median (ε)":
+            elif curr_val == "DP Median with exponential mechanism (ε)":
                 UtilityWindow(DPMedian, "eps")
-            elif curr_val == "DP Median (alphabet size)":
+            elif curr_val == "DP Median with exponential mechanism (alphabet size)":
                 UtilityWindow(DPMedian, "alphabet_size")
             elif curr_val == "Randomized response (ε)":
                 UtilityWindow(RandomizedResponse, "eps")
@@ -67,11 +67,11 @@ class MainWindow:
 
         combob_utilities = ttk.Combobox(utilities_frame, width=_BUTTON_LENGTH)
         combob_utilities['values'] = (
-            "DP Histogram (ε)",
-            "DP Mean (ε)",
-            "DP Mean (δ)",
-            "DP Median (ε)",
-            "DP Median (alphabet size)",
+            "DP Histogram with Laplace mechanism (ε)",
+            "DP Mean with Gaussian mechanism (ε)",
+            "DP Mean with Gaussian mechanism (δ)",
+            "DP Median with exponential mechanism (ε)",
+            "DP Median with exponential mechanism (alphabet size)",
             "Randomized response (ε)",
             "Randomized response (alphabet size)"
         )
