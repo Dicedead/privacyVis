@@ -1,10 +1,10 @@
 import tkinter as tk
 from copy import copy
 from tkinter import ttk
-from typing import Type
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
+from definitions import SLIDER_RESOLUTION_INTEGER, SLIDER_RESOLUTION_NON_INTEGER
 from region_figures import MultiRegionFigure
 from adapters import *
 
@@ -16,9 +16,7 @@ _INTERSECTOR_WIDTH = 300
 
 _FIGSIZE = (7, 7)
 _DPI = 100
-_RESOLUTION_NON_INTEGER = 0.05
-_RESOLUTION_INTEGER = 1
-_SLIDER_LENGTH = 200
+_SLIDER_LENGTH = 230
 _COMBOB_LENGTH = 35
 _INTERSECT_REGIONS = "Intersect regions"
 _DEFAULT_REGION_INTERSECTION_NAME = "Intersection"
@@ -27,6 +25,7 @@ _REGION_VALUES = [
     DPRegion,
     DPBasicCompositionRegion,
     DPExactCompositionRegion,
+    DPSimplifiedCompositionRegion,
     DPTVRegion,
     DPTVCompositionRegion,
     GaussianDPRegion,
@@ -310,7 +309,7 @@ class PrivacyWindow:
 
             self._slider_frame.rowconfigure(idx, weight=1)
             a, b = limit_map[param]
-            resolution = _RESOLUTION_INTEGER if resolution_map[param] else _RESOLUTION_NON_INTEGER
+            resolution = SLIDER_RESOLUTION_INTEGER if resolution_map[param] else SLIDER_RESOLUTION_NON_INTEGER
             scale = tk.Scale(self._slider_frame,
                              from_=a, to=b,
                              variable=slider_vars[param],

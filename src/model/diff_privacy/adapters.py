@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Any, Dict, Tuple, Type
+from typing import Dict, Tuple, Type
 
-from definitions import Region
+from definitions import Region, SLIDER_RESOLUTION_NON_INTEGER
 from regions import *
 
 from mechanisms import laplace_mechanism, gaussian_mechanism, randomized_response_mechanism
@@ -254,6 +254,90 @@ class DPExactCompositionRegion(AdaptedRegionComputer):
     @staticmethod
     def region_graph_name() -> str:
         return "DP exact comp."
+
+
+class DPSimplifiedCompositionRegion(AdaptedRegionComputer):
+
+    @staticmethod
+    def region_computation(*args, **kwargs) -> Region:
+        return region_from_dp_composition_simplified(
+            [kwargs['eps']] * kwargs['k'], [kwargs['delta']] * kwargs['k'], kwargs['delta_s']
+        )
+
+    @staticmethod
+    def params() -> List[str]:
+        return ['eps', 'delta', 'k', 'delta_s']
+
+    @staticmethod
+    def params_to_kwargs() -> Dict[str, str]:
+        return {
+            'eps': 'eps',
+            'delta': 'delta',
+            'k': 'k',
+            'delta_s': 'delta_s'
+        }
+
+    @staticmethod
+    def params_are_integers() -> Dict[str, bool]:
+        return {
+            'eps': False,
+            'delta': False,
+            'k': True,
+            'delta_s': False
+        }
+
+    @staticmethod
+    def params_are_logscale() -> Dict[str, bool]:
+        return {
+            'eps': True,
+            'delta': False,
+            'k': False,
+            'delta_s': False
+        }
+
+    @staticmethod
+    def params_to_slider_labels() -> Dict[str, str]:
+        return {
+            'eps': 'log(ε)',
+            'delta': 'δ',
+            'k': 'Number of mechanisms (k)',
+            'delta_s': 'δ slack'
+        }
+
+    @staticmethod
+    def params_to_graph_labels() -> Dict[str, str]:
+        return {
+            'eps': '$\\epsilon$',
+            'delta': '$\\delta$',
+            'k': '$k$',
+            'delta_s': '$\\tilde{\\delta}$'
+        }
+
+    @staticmethod
+    def params_to_default_vals() -> Dict[str, float]:
+        return {
+            'eps': np.log10(0.6),
+            'delta': 0.1,
+            'k': 2,
+            'delta_s': 3 * SLIDER_RESOLUTION_NON_INTEGER
+        }
+
+    @staticmethod
+    def params_to_limits() -> Dict[str, Tuple[float, float]]:
+        return {
+            'eps': (-3, 1),
+            'delta': (0.0, 1.0),
+            'k': (1, 100),
+            'delta_s': (SLIDER_RESOLUTION_NON_INTEGER, 1.0)
+        }
+
+    @staticmethod
+    def adder_label() -> str:
+        return 'DP simplified composition region'
+
+    @staticmethod
+    def region_graph_name() -> str:
+        return "DP simplified comp."
 
 class DPBasicCompositionRegion(AdaptedRegionComputer):
 
@@ -722,7 +806,7 @@ class GaussianMechanismRegion(AdaptedRegionComputer):
     def params_to_limits() -> Dict[str, Tuple[float, float]]:
         return {
             'eps': (-3, 1),
-            'delta': (0.05, 1.0)
+            'delta': (SLIDER_RESOLUTION_NON_INTEGER, 1.0)
         }
 
     @staticmethod

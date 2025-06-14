@@ -48,8 +48,9 @@ class DPHistogram(DPQuery):
         return 2 * kwargs["hist_num_bins"] * (LaplaceMechanism.noise_scale_func(kwargs["hist_eps"], 2) ** 2)
 
     @staticmethod
-    def pretty_name() -> str:
-        return "histogram"
+    def window_title() -> str:
+        return ("Privacy/utility trade-off of the histogram query privatized by the Laplace mechanism versus the mean "
+                "squared error metric")
 
     def apply(self, x: np.ndarray) -> Any:
         return self._laplace(self._hist.apply(x))
@@ -120,4 +121,8 @@ class DPHistogram(DPQuery):
     @staticmethod
     def utility_label() -> str:
         return "Mean squared error"
+
+    @staticmethod
+    def privacy_plot_title() -> str:
+        return "Laplace mechanism privacy region"
 

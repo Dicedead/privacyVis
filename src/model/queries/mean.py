@@ -1,7 +1,7 @@
 import numpy as np
 
+from definitions import SLIDER_RESOLUTION_NON_INTEGER
 from gaussian_mechanism import GaussianMechanism
-from laplace_mechanism import LaplaceMechanism
 from sensitivities import L1Sensitivity
 from query import Query, DPQuery
 from typing import Any, Dict, Tuple, List
@@ -91,8 +91,9 @@ class DPMean(DPQuery):
         return self._gaussian_mech.privacy_region()
 
     @staticmethod
-    def pretty_name() -> str:
-        return "mean"
+    def window_title() -> str:
+        return ("Privacy/utility trade-off of the mean query privatized by the Gaussian mechanism versus the mean "
+                "squared error metric")
 
     @staticmethod
     def params() -> List[str]:
@@ -122,9 +123,9 @@ class DPMean(DPQuery):
     def params_to_limits() -> Dict[str, Tuple[float, float]]:
         return {
             "eps": (-3, 1),
-            "delta": (0.05, 1),
+            "delta": (SLIDER_RESOLUTION_NON_INTEGER, 1),
             "dataset_size": (1, 200),
-            "dataset_diameter": (0.1, 20),
+            "dataset_diameter": (SLIDER_RESOLUTION_NON_INTEGER, 20),
             "dimensions": (1, 20)
         }
 
@@ -138,3 +139,6 @@ class DPMean(DPQuery):
             "dimensions": False
         }
 
+    @staticmethod
+    def privacy_plot_title() -> str:
+        return "Gaussian mechanism privacy region"

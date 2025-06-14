@@ -50,8 +50,9 @@ class DPMedian(DPQuery):
         return np.minimum(1, kwargs["m"] * np.exp(-kwargs["eps"] * kwargs["t"]/4))
 
     @staticmethod
-    def pretty_name() -> str:
-        return "median"
+    def window_title() -> str:
+        return ("DP guarantee of the exponential mechanism for the median mechanism versus a probability bound on how off"
+                " the privatized median is from the true median")
 
     @staticmethod
     def params() -> List[str]:
@@ -124,3 +125,7 @@ class DPMedian(DPQuery):
     @staticmethod
     def utility_label() -> str:
         return "Bound on $\\mathbb{P}\\left(\\left|position(M(X),X)-\\frac{n}{2}\\right| \\geq t\\right)$"
+
+    @staticmethod
+    def privacy_plot_title() -> str:
+        return "$(\\epsilon, 0)-$DP exponential mechanism"

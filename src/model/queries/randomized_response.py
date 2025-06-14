@@ -25,8 +25,8 @@ class RandomizedResponse(DPQuery):
         return RandomizedResponseMech.compute_randomized_response_proba(kwargs['eps'], kwargs['alphabet_size'])
 
     @staticmethod
-    def pretty_name() -> str:
-        return "randomized response"
+    def window_title() -> str:
+        return "DP region of randomized response versus the probability of a uniformly random output"
 
     @staticmethod
     def params() -> List[str]:
@@ -91,4 +91,8 @@ class RandomizedResponse(DPQuery):
 
     @staticmethod
     def utility_label() -> str:
-        return 'Random choice probability'
+        return 'Probability of a uniform choice'
+
+    @staticmethod
+    def privacy_plot_title() -> str:
+        return "Randomized response privacy region"

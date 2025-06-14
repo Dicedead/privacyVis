@@ -30,7 +30,7 @@ class DPQuery(Query):
 
     @staticmethod
     @abstractmethod
-    def pretty_name() -> str:
+    def window_title() -> str:
         pass
 
     @staticmethod
@@ -81,5 +81,10 @@ class DPQuery(Query):
     @staticmethod
     @abstractmethod
     def utility_label() -> str:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def privacy_plot_title() -> str:
         pass
 

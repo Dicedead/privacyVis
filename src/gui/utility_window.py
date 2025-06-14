@@ -7,16 +7,14 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
                                                NavigationToolbar2Tk)
 
+from definitions import SLIDER_RESOLUTION_INTEGER, SLIDER_RESOLUTION_NON_INTEGER
 from histogram import DPHistogram
 from mean import DPMean
 from query import DPQuery
 from region_figures import MultiRegionFigure
 
-_RESOLUTION_NON_INTEGER = 0.05
-_RESOLUTION_INTEGER = 1
 _SLIDER_LENGTH = 300
 _WINDOW_SIZE = "1300x900"
-_PRIVACY_PLOT_TITLE = "Differential privacy"
 
 class UtilityWindow:
     def __init__(self,
@@ -27,7 +25,7 @@ class UtilityWindow:
         self._dpqcls = dpqcls
 
         self._window = tk.Tk()
-        self._window.title(f"Utility / Privacy trade-off for the {dpqcls.pretty_name()} query")
+        self._window.title(dpqcls.window_title())
         self._window.geometry(window_size)
 
         self._window.rowconfigure(0, weight=15)
@@ -137,7 +135,7 @@ class UtilityWindow:
             self._dpqcls(**construct_args).privacy_region(),
             _graph_label()
         )
-        self._privacy_fig.finish_figure(_PRIVACY_PLOT_TITLE)
+        self._privacy_fig.finish_figure(self._dpqcls.privacy_plot_title())
 
         self._privacy_canvas.draw()
         self._privacy_canvas.flush_events()
@@ -168,7 +166,7 @@ class UtilityWindow:
         for idx, param in enumerate(param_list):
             slider_frame.rowconfigure(idx, weight=1)
             a, b = limit_map[param]
-            resolution = _RESOLUTION_INTEGER if resolution_map[param] else _RESOLUTION_NON_INTEGER
+            resolution = SLIDER_RESOLUTION_INTEGER if resolution_map[param] else SLIDER_RESOLUTION_NON_INTEGER
             scale = tk.Scale(slider_frame,
                              from_=a, to=b,
                              variable=self._param_vals[param],
