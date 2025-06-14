@@ -150,28 +150,14 @@ class MultiRegionFigure:
     def _region_comparator(prioritize_region: int):
 
         def inner(region1: Tuple[np.ndarray, str, int], region2: Tuple[np.ndarray, str, int]):
+            reg1, _, index1 = region1
+            reg2, _, index2 = region2
 
-            if region1[2] == prioritize_region:
+            if index1 == prioritize_region:
                 return -1
-            elif region2[2] == prioritize_region:
+            elif index2 == prioritize_region:
                 return 1
 
-            diff = region1[0] - region2[0]
-            one_contains_two = np.all(diff >= 0)
-            two_contains_one = np.all(-diff >= 0)
-            diff = region1[0] - region2[0]
-            one_contains_two = np.all(diff >= 0)
-            two_contains_one = np.all(-diff >= 0)
-
-            if one_contains_two and not two_contains_one:
-                return 1
-
-            if two_contains_one and not one_contains_two:
-                return -1
-
-            if one_contains_two and two_contains_one:
-                return 0
-
-            return diff.sum()
+            return (reg1 - reg2).sum()
 
         return inner

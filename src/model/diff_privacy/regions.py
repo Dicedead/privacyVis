@@ -40,8 +40,6 @@ def region_from_dp_params(eps: float, delta: float) -> Region:
     assert eps >= 0
     assert delta >= 0
 
-    # assert 0 <= delta <= 1
-
     exp = np.exp(eps)
     ineq = lambda fp, fn: fp + exp * fn >= 1 - delta
     reverse_ineq = lambda fp, fn: ineq(fn, fp)
@@ -149,7 +147,7 @@ def region_from_dp_composition_simplified(
     exp_sum = np.sum(((np.exp(eps_ls) - 1) * eps_ls)/(np.exp(eps_ls) + 1))
     delta_ls = np.array(delta_ls)
 
-    delta = 1 - (1 - delta_slack) * np.prod(1 - delta_ls)
+    delta = 1 - (1 - delta_slack) * np.prod(1. - delta_ls)
 
     eps_opt1 = sum_eps
     eps_opt2 = exp_sum + np.sqrt(-2 * np.log(delta_slack) * sum_eps_sq)
