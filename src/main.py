@@ -36,7 +36,7 @@ class MainWindow:
             PrivacyWindow()
 
         privacy_button = ttk.Button(self._window,
-                                    text="Open privacy window",
+                                    text="Open privacy regions window",
                                     command=lambda: onclick(),
                                     width=_BUTTON_LENGTH
                                     )

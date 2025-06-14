@@ -35,6 +35,8 @@ _REGION_VALUES = [
     RandomizedResponseRegion
 ]
 
+_ADDER_COMBOB_HEIGHT = len(_REGION_VALUES) + 1
+
 _ADDER_LABELS_TO_CLS_MAP = {}
 for cls in _REGION_VALUES:
     _ADDER_LABELS_TO_CLS_MAP[cls.adder_label()] = cls
@@ -267,7 +269,9 @@ class PrivacyWindow:
         adder_label.pack()
 
         adder_val = tk.StringVar()
-        adder_combob = ttk.Combobox(adder_frame, textvariable=adder_val, width=_COMBOB_LENGTH)
+        adder_combob = ttk.Combobox(adder_frame, textvariable=adder_val,
+                                    width=_COMBOB_LENGTH, height=_ADDER_COMBOB_HEIGHT
+                                    )
         adder_combob.pack()
 
         adder_combob['state'] = 'readonly'
