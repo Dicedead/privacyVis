@@ -236,7 +236,7 @@ class DPExactCompositionRegion(AdaptedRegionComputer):
         return {
             'eps': np.log10(0.6),
             'delta': 0.1,
-            'k': 2,
+            'k': 4,
         }
 
     @staticmethod
@@ -544,7 +544,7 @@ class DPTVCompositionRegion(AdaptedRegionComputer):
     @staticmethod
     def params_to_default_vals() -> Dict[str, float]:
         return {
-            'eps': np.log10(0.3),
+            'eps': np.log10(0.6),
             'delta': 0.05,
             'eta': 0.2,
             'k': 4,

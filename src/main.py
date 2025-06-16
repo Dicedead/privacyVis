@@ -48,9 +48,9 @@ class MainWindow:
             self._window.destroy()
             if curr_val == "DP Histogram with Laplace mechanism (ε)":
                 UtilityWindow(DPHistogram, "eps")
-            elif curr_val == "DP Mean with Gaussian mechanism (δ)":
-                UtilityWindow(DPMean, "eps")
             elif curr_val == "DP Mean with Gaussian mechanism (ε)":
+                UtilityWindow(DPMean, "eps")
+            elif curr_val == "DP Mean with Gaussian mechanism (δ)":
                 UtilityWindow(DPMean, "delta")
             elif curr_val == "DP Median with exponential mechanism (ε)":
                 UtilityWindow(DPMedian, "eps")
