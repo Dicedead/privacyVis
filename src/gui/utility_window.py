@@ -9,7 +9,6 @@ from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
 
 from definitions import SLIDER_RESOLUTION_INTEGER, SLIDER_RESOLUTION_NON_INTEGER
 from histogram import DPHistogram
-from mean import DPMean
 from query import DPQuery
 from region_figures import MultiRegionFigure
 

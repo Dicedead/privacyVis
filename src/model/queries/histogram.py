@@ -114,7 +114,7 @@ class DPHistogram(DPQuery):
     @staticmethod
     def params_to_default_vals() -> Dict[str, float]:
         return {
-            "eps": np.log10(0.32),
+            "eps": np.log10(0.5),
             "num_bins": 10
         }
 

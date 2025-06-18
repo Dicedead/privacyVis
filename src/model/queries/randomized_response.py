@@ -85,7 +85,7 @@ class RandomizedResponse(DPQuery):
     @staticmethod
     def params_to_default_vals() -> Dict[str, float]:
         return {
-            'eps': np.log10(0.6),
+            'eps': np.log10(0.5),
             'alphabet_size': 5
         }
 

@@ -36,8 +36,8 @@ class DPMean(DPQuery):
 
     @staticmethod
     def utility_func(*args, **kwargs):
-        return (2 * kwargs["mean_dimensions"] *
-                (GaussianMechanism.noise_scale_func(kwargs["mean_eps"],kwargs["mean_delta"],
+        return (kwargs["mean_dimensions"] *
+                (GaussianMechanism.noise_scale_func(kwargs["mean_eps"], kwargs["mean_delta"],
                  kwargs["mean_dataset_diameter"]/kwargs["mean_dataset_size"])))
 
     def apply(self, x: np.ndarray) -> Any:
@@ -76,7 +76,7 @@ class DPMean(DPQuery):
     @staticmethod
     def params_to_default_vals() -> Dict[str, float]:
         return {
-            "eps": 0.3,
+            "eps": np.log10(0.5),
             "delta": 0.1,
             "dataset_size": 50,
             "dataset_diameter": 10,
