@@ -21,6 +21,8 @@ _COMBOB_LENGTH = 35
 _INTERSECT_REGIONS = "Intersect regions"
 _DEFAULT_REGION_INTERSECTION_NAME = "Intersection"
 
+_SHOW_LINES = True
+
 _REGION_VALUES = [
     DPRegion,
     DPBasicCompositionRegion,
@@ -92,7 +94,7 @@ class PrivacyWindow:
         self._window.mainloop()
 
     def plot_privacy(self):
-        self._privacy_fig = MultiRegionFigure(figsize=_FIGSIZE, dpi=_DPI)
+        self._privacy_fig = MultiRegionFigure(figsize=_FIGSIZE, dpi=_DPI, show_line=_SHOW_LINES)
         self._privacy_canvas = FigureCanvasTkAgg(self._privacy_fig.get_figure(), master=self._window)
 
         privacy_toolbar_frame = tk.Frame(self._window)

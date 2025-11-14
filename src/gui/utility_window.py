@@ -98,13 +98,12 @@ class UtilityWindow:
         utility_plot.axvline(x=main_param_val, color='black', linestyle='--')
         utility_plot.set_xlabel(self._dpqcls.params_to_graph_labels()[main_param])
         utility_plot.set_title(self._dpqcls.utility_label())
-        #utility_plot.set_title("Utility")
 
         self._utility_canvas.draw()
         self._utility_canvas.flush_events()
 
     def plot_privacy(self):
-        self._privacy_fig = MultiRegionFigure()
+        self._privacy_fig = MultiRegionFigure(show_line=False)
         self._privacy_canvas = FigureCanvasTkAgg(self._privacy_fig.get_figure(), master=self._window)
 
         self.replot_privacy()

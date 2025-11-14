@@ -4,7 +4,7 @@ import scipy.special as sps
 import scipy.stats as stats
 import numpy as np
 
-from definitions import Region, TradeOffFunction
+from definitions import Region, TradeOffFunction, SUM_LINE
 from typing import List
 
 
@@ -43,9 +43,8 @@ def region_from_dp_params(eps: float, delta: float) -> Region:
     exp = np.exp(eps)
     ineq = lambda fp, fn: fp + exp * fn >= 1 - delta
     reverse_ineq = lambda fp, fn: ineq(fn, fp)
-    sum_line = lambda fp, fn: fp + fn <= 1
 
-    return [ineq, reverse_ineq, sum_line]
+    return [ineq, reverse_ineq, SUM_LINE]
 
 def region_from_dp_tv_params(eps: float, delta: float, eta: float):
     """
@@ -227,10 +226,9 @@ def region_from_f_dp(f: TradeOffFunction) -> Region:
     :return: Region
             List of constraints defining the privacy region, above f.
     """
-    sum_line = lambda fp, fn: fp + fn <= 1
     main_region = lambda fp, fn: fn >= f(fp)
 
-    return [sum_line, main_region]
+    return [SUM_LINE, main_region]
 
 def tradeoff_eps_delta_dp(eps: float, delta: float) -> TradeOffFunction:
     """

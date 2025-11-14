@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
-from definitions import Constraint, Region, LINE_REGION_THICKNESS
+from definitions import Constraint, Region, LINE_REGION_THICKNESS, SUM_LINE
 from typing import Sequence, List, Tuple
 from functools import reduce
 
@@ -66,7 +66,8 @@ class MultiRegionFigure:
         grid_res=600,
         palette=None,
         figsize=(6, 6),
-        dpi=100
+        dpi=100,
+        show_line=True
     ):
         self._fig = plt.figure(figsize=figsize, dpi=dpi)
         self._plot = self._fig.add_subplot()
@@ -76,6 +77,7 @@ class MultiRegionFigure:
         self._start = start_grid
         self._stop = stop_grid
         self._region_id = -1
+        self._show_line = show_line
 
         if palette is None:
             palette = copy.deepcopy(colourblind_palette())
@@ -132,8 +134,12 @@ class MultiRegionFigure:
         self._fig.savefig(fname=path)
 
     def _compute_region(self, region: Region):
-        applied_constraints = [constraint(self._x, self._y) for constraint in region]
+        applied_constraints = [constraint(self._x, self._y) for constraint in region
+                               if constraint is not SUM_LINE or not self._show_line]
         whole_reg = reduce(lambda c1, c2: c1 & c2, applied_constraints).astype(int)
+
+        if not self._show_line:
+            return whole_reg
 
         row_csum = np.cumsum(whole_reg, axis=1)
         line_reg = (row_csum <= LINE_REGION_THICKNESS).astype(whole_reg.dtype) * whole_reg
