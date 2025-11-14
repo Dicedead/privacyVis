@@ -10,3 +10,5 @@ ScoreFunction = Callable[[np.ndarray, Any], np.ndarray]
 
 SLIDER_RESOLUTION_NON_INTEGER = 0.01
 SLIDER_RESOLUTION_INTEGER = 1
+
+LINE_REGION_THICKNESS = 8

@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
-from definitions import Constraint, Region
+from definitions import Constraint, Region, LINE_REGION_THICKNESS
 from typing import Sequence, List, Tuple
 from functools import reduce
 
@@ -133,7 +133,15 @@ class MultiRegionFigure:
 
     def _compute_region(self, region: Region):
         applied_constraints = [constraint(self._x, self._y) for constraint in region]
-        return reduce(lambda c1, c2: c1 & c2, applied_constraints).astype(int)
+        whole_reg = reduce(lambda c1, c2: c1 & c2, applied_constraints).astype(int)
+
+        row_csum = np.cumsum(whole_reg, axis=1)
+        line_reg = (row_csum <= LINE_REGION_THICKNESS).astype(whole_reg.dtype) * whole_reg
+
+        col_csum = np.cumsum(whole_reg, axis=0)
+        col_reg = (col_csum <= LINE_REGION_THICKNESS).astype(whole_reg.dtype) * whole_reg
+
+        return np.bitwise_or(line_reg, col_reg)
 
     def _compute_and_sort_regions(self, labelled_regions: List[Tuple[Sequence[Constraint], str, int]], prioritize_region) \
             -> List[Tuple[np.ndarray, str]]:
